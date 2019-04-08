@@ -1,3 +1,12 @@
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+using namespace std;
+using namespace cv;
+
+
 // gray 변환 후 CV_32F로 변환 필요
 
 Mat orientation(const Mat &inputImage, Mat &orientationMap, int blockSize)
