@@ -29,6 +29,7 @@ Mat gabor(Mat src) {
 		addWeighted(dst, 1, temp, 1, 0, dst, CV_32F);
 	}
 	dst.convertTo(dst, CV_8U);
+	threshold(dst, dst, 80, 255, THRESH_BINARY_INV);
 
 	return dst;
 }

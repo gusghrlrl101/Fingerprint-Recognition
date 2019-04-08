@@ -1,3 +1,6 @@
+#ifndef ORENTATION_HPP
+#define ORENTATION_HPP
+
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -9,8 +12,20 @@ using namespace cv;
 
 // gray 변환 후 CV_32F로 변환 필요
 
-Mat orientation(const Mat &inputImage, Mat &orientationMap, int blockSize)
+pair<Mat,Mat> orientation(Mat src, int size = 8)
 {
+	Mat inputImage = src;
+
+	cvtColor(src, inputImage, COLOR_RGB2GRAY);
+	inputImage.convertTo(inputImage, CV_32F, 1.0 / 255, 0);
+
+	medianBlur(inputImage, inputImage, 3);
+	imshow("medianBlur", inputImage);
+
+	int blockSize = size;// SPECIFY THE BLOCKSIZE;
+
+	Mat orientationMap;
+
 	Mat fprintWithDirectionsSmoo = inputImage.clone();
 	Mat tmp(inputImage.size(), inputImage.type());
 	Mat coherence(inputImage.size(), inputImage.type());
@@ -51,8 +66,8 @@ Mat orientation(const Mat &inputImage, Mat &orientationMap, int blockSize)
 			float Gyy = 0.0;
 
 			//for check bounds of img
-			blockH = ((height - i)<blockSize) ? (height - i) : blockSize;
-			blockW = ((width - j)<blockSize) ? (width - j) : blockSize;
+			blockH = ((height - i) < blockSize) ? (height - i) : blockSize;
+			blockW = ((width - j) < blockSize) ? (width - j) : blockSize;
 
 			//average at block WхW
 			for (int u = i; u < i + blockH; u++)
@@ -81,7 +96,7 @@ Mat orientation(const Mat &inputImage, Mat &orientationMap, int blockSize)
 					orientationMap.at<float>(u, v) = fi;
 					Fx.at<float>(u, v) = Fx.at<float>(i, j);
 					Fy.at<float>(u, v) = Fy.at<float>(i, j);
-					coherence.at<float>(u, v) = (coh<0.85) ? 1 : 0;
+					coherence.at<float>(u, v) = (coh < 0.85) ? 1 : 0;
 				}
 			}
 
@@ -91,8 +106,8 @@ Mat orientation(const Mat &inputImage, Mat &orientationMap, int blockSize)
 	  // TO DO#3:
 
 	  // DO GAUSSIAN BLUR SMOOTHING (BOTH IN X & Y DIRECTIONS) --> TAKE Fx & Fy AS INPUTS AND GET Fx_gauss & Fy_gauss AS OUTPUTS WITH KERNEL SIZE 5X5
-	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 0, 0);
-	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 0, 0);
+	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 1, 0);
+	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 0, 1);
 	for (int m = 0; m < height; m++)
 	{
 		for (int n = 0; n < width; n++)
@@ -102,20 +117,24 @@ Mat orientation(const Mat &inputImage, Mat &orientationMap, int blockSize)
 				int x = n;
 				int y = m;
 				int ln = sqrt(2 * pow(blockSize, 2)) / 2;
-				float dx = ln*cos(smoothed.at<float>(m, n) - CV_PI / 2);
-				float dy = ln*sin(smoothed.at<float>(m, n) - CV_PI / 2);
+				float dx = ln * cos(smoothed.at<float>(m, n) - CV_PI / 2);
+				float dy = ln * sin(smoothed.at<float>(m, n) - CV_PI / 2);
 				arrowedLine(fprintWithDirectionsSmoo, Point(x, y + blockH), Point(x + dx, y + blockW + dy), Scalar::all(255), 1, LINE_AA, 0, 0.06*blockSize);
 			}
 		}
 	}///for2
-
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
-	//imshow("Orientation field", orientationMap);
-	orientationMap = smoothed.clone();
+//	imshow("Orientation field", orientationMap);
+
+//	orientationMap = smoothed.clone();
 
 	normalize(smoothed, smoothed, 0, 1, NORM_MINMAX);
+
 	//imshow("Smoothed orientation field", smoothed);
 	//imshow("Coherence", coherence);
-	//imshow("Orientation", fprintWithDirectionsSmoo);
-	return fprintWithDirectionsSmoo;
+	// imshow("Orientation", fprintWithDirectionsSmoo);
+	pair<Mat,Mat> returning = { fprintWithDirectionsSmoo, orientationMap };
+	return returning;
 }
+
+#endif
