@@ -6,10 +6,8 @@ using namespace std;
 using namespace cv;
 
 int main() {
-	Mat img;
-	img = imread("E:\\opencv\\Fingerprint\\Fingerprint-Recognition\\Fingerprint_Recognition\\image\\Team1\\2019_1_1_L_I_1.bmp");
-
-	imshow("first", img);
+	Mat src = imread("image/etc/1.bmp");
+	imshow("SRC", src);
 	waitKey(0);
 
 	return 0;
