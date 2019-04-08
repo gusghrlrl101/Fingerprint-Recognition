@@ -146,6 +146,7 @@
     <ClCompile Include="gabor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="orientation.cpp" />
+    <ClCompile Include="segmentation.cpp" />
     <ClCompile Include="thinning.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
