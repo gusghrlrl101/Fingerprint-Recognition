@@ -6,8 +6,9 @@ using namespace std;
 using namespace cv;
 
 int main() {
-	cout << "hello world!" << endl;
-
+	Mat src = imread("image/etc/1.bmp");
+	imshow("SRC", src);
+	waitKey(0);
 
 	return 0;
 }
