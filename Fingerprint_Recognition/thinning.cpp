@@ -80,6 +80,8 @@ void thinningIteration(cv::Mat& img, int iter)
 
 	img &= ~marker;
 }
+
+
 void thinning(const cv::Mat& src, cv::Mat& dst)
 {
 	dst = src.clone();
