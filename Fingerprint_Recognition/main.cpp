@@ -11,8 +11,13 @@
 using namespace std;
 using namespace cv;
 
+Scalar white = CV_RGB(255, 255, 255);
+Scalar green = CV_RGB(0, 255, 0);
+
 int main() {
+	Mat color;
 	Mat src = imread("image/etc/1.bmp");
+	cvtColor(src, color, COLOR_RGB2GRAY);
 
 	Mat segmented = segmentation(src);
 
@@ -24,7 +29,9 @@ int main() {
 
 	Mat gabored = gabor(segmented);
 
-	Mat thinned = thinning(gabored);
+	Mat imgt = thinning(gabored);
+
+	Mat harris_corners;
 
 	pyrUp(src, src);
 	imshow("src", src);
@@ -43,10 +50,9 @@ int main() {
 	pyrUp(gabored, gabored);
 	imshow("gabored", gabored);
 
-	thinned.convertTo(thinned, CV_8U);
-	pyrUp(thinned, thinned);
-	imshow("thinned", thinned);
-
+	imgt.convertTo(imgt, CV_8U);
+	pyrUp(imgt, imgt);
+	imshow("thinned", imgt);
+	
 	waitKey(0);
-	return 0;
 }
