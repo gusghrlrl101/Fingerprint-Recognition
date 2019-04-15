@@ -9,6 +9,7 @@ using namespace cv;
 int main()
 {
 	Mat src = imread("image/Team1/2019_1_2_L_I_1.bmp");
+	imshow("src", src);
 
 	Mat kernel = (Mat_<float>(3, 3) <<
 		1, 1, 1,
@@ -42,11 +43,14 @@ int main()
 	// Normalize the distance image for range = {0.0, 1.0}
 	// so we can visualize and threshold it
 	normalize(dist, dist, 0, 1.0, NORM_MINMAX);
-	threshold(dist, dist, 0.4, 1.0, THRESH_BINARY);
+	threshold(dist, dist, 0.4, 1.0, THRESH_BINARY_INV);
 
 	Mat kernel1 = Mat::ones(3, 3, CV_8U);
 	dilate(dist, dist, kernel1);
 	imshow("Peaks", dist);
+
+	src.copyTo(dist);
+	imshow("final",src);
 
 	waitKey();
 	return 0;
