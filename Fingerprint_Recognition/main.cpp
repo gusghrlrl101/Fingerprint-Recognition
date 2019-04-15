@@ -11,6 +11,9 @@
 using namespace std;
 using namespace cv;
 
+Scalar white = CV_RGB(255, 255, 255);
+Scalar green = CV_RGB(0, 255, 0);
+
 int main() {
 	int block_size = 9;
 	Mat src = imread("image/etc/2.bmp");
@@ -29,7 +32,9 @@ int main() {
 
 	Mat gabored = gabor(segmented, vec, block_size);
 
-	Mat thinned = thinning(gabored);
+	Mat imgt = thinning(gabored);
+
+	Mat harris_corners;
 
 	pyrUp(src, src);
 	imshow("src", src);
@@ -45,10 +50,9 @@ int main() {
 	pyrUp(gabored, gabored);
 	imshow("gabored", gabored);
 
-	thinned.convertTo(thinned, CV_8U);
-	pyrUp(thinned, thinned);
-	imshow("thinned", thinned);
-
+	imgt.convertTo(imgt, CV_8U);
+	pyrUp(imgt, imgt);
+	imshow("thinned", imgt);
+	
 	waitKey(0);
-	return 0;
 }

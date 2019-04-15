@@ -27,14 +27,12 @@ Mat segmentation(Mat src) {
 	imgResult.convertTo(imgResult, CV_8UC3);
 	imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
 
-	//! [bin]
 	// Create binary image from source image
 	Mat bw;
 	cvtColor(imgResult, bw, COLOR_BGR2GRAY);
 	threshold(bw, bw, 50, 255, THRESH_BINARY | THRESH_OTSU);
 	// imshow("Binary Image", bw);
 
-	//! [dist]
 	// Perform the distance transform algorithm
 	Mat dist;
 	distanceTransform(bw, dist, DIST_L2, 3);

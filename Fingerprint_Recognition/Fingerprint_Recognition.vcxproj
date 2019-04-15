@@ -146,7 +146,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="distance.hpp" />
     <ClInclude Include="gabor.hpp" />
+    <ClInclude Include="Minutiae.hpp" />
     <ClInclude Include="orientation.hpp" />
     <ClInclude Include="segmentation.hpp" />
     <ClInclude Include="thinning.hpp" />
