@@ -1,3 +1,6 @@
+#ifndef SEGMENTATION_HPP
+#define SEGMENTATION_HPP
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -6,15 +9,11 @@
 using namespace std;
 using namespace cv;
 
-int main()
-{
-	Mat src = imread("image/Team1/2019_1_2_L_I_1.bmp");
-	imshow("src", src);
-
+Mat segmentation(Mat src) {
 	Mat kernel = (Mat_<float>(3, 3) <<
 		1, 1, 1,
 		1, -8, 1,
-		1, 1, 1); 
+		1, 1, 1);
 
 	Mat imgLaplacian;
 	filter2D(src, imgLaplacian, CV_32F, kernel);
@@ -22,7 +21,7 @@ int main()
 	Mat sharp;
 	src.convertTo(sharp, CV_32F);
 	Mat imgResult = sharp - imgLaplacian;
-	imshow("imgResult", imgResult);
+//	imshow("imgResult", imgResult);
 
 	// convert back to 8bits gray scale
 	imgResult.convertTo(imgResult, CV_8UC3);
@@ -47,11 +46,12 @@ int main()
 
 	Mat kernel1 = Mat::ones(3, 3, CV_8U);
 	dilate(dist, dist, kernel1);
-	imshow("Peaks", dist);
+	dist.convertTo(dist, CV_8U);
 
-	src.copyTo(dist);
-	imshow("final",src);
+	Mat result;
+	copyTo(src, result, dist);
 
-	waitKey();
-	return 0;
+	return result;
 }
+
+#endif

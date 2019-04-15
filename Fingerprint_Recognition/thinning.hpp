@@ -1,3 +1,6 @@
+#ifndef THINNING_HPP
+#define THINNING_HPP
+
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -82,8 +85,9 @@ void thinningIteration(cv::Mat& img, int iter)
 }
 
 
-void thinning(const cv::Mat& src, cv::Mat& dst)
+Mat thinning(const cv::Mat& src)
 {
+	Mat dst;
 	dst = src.clone();
 	dst /= 255;         // convert to binary image
 
@@ -97,5 +101,10 @@ void thinning(const cv::Mat& src, cv::Mat& dst)
 		dst.copyTo(prev);
 	} while (cv::countNonZero(diff) > 0);
 
+
 	dst *= 255;
+
+	return dst;
 }
+
+#endif

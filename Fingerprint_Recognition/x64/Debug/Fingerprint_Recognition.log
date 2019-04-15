@@ -1,2 +1,21 @@
-﻿  segmentation.cpp
-  Fingerprint_Recognition.vcxproj -> E:\opencv\Fingerprint\Fingerprint-Recognition\x64\Debug\Fingerprint_Recognition.exe
+﻿  main.cpp
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(86): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(99): warning C4244: '=': 'int'에서 '_Tp'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              _Tp=float
+          ]
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(115): warning C4244: '=': 'double'에서 '_Tp'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              _Tp=float
+          ]
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(119): warning C4244: '초기화 중': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(120): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(121): warning C4244: '초기화 중': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\hyunho\source\repos\fingerprint_recognition\fingerprint_recognition\orientation.hpp(122): warning C4244: '인수': 'float'에서 '_Tp'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              _Tp=int
+          ]
+  Fingerprint_Recognition.vcxproj -> C:\Users\HYUNHO\source\repos\Fingerprint_Recognition\x64\Debug\Fingerprint_Recognition.exe
