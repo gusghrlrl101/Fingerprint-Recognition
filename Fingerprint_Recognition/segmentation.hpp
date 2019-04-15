@@ -32,7 +32,7 @@ Mat segmentation(Mat src) {
 	Mat bw;
 	cvtColor(imgResult, bw, COLOR_BGR2GRAY);
 	threshold(bw, bw, 50, 255, THRESH_BINARY | THRESH_OTSU);
-	//imshow("Binary Image", bw);
+	// imshow("Binary Image", bw);
 
 	//! [dist]
 	// Perform the distance transform algorithm

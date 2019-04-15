@@ -12,7 +12,7 @@ using namespace cv;
 
 // gray 변환 후 CV_32F로 변환 필요
 
-pair<Mat,Mat> orientation(Mat src, int size = 8)
+pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 {
 	Mat inputImage = src;
 
@@ -106,34 +106,40 @@ pair<Mat,Mat> orientation(Mat src, int size = 8)
 	  // TO DO#3:
 
 	  // DO GAUSSIAN BLUR SMOOTHING (BOTH IN X & Y DIRECTIONS) --> TAKE Fx & Fy AS INPUTS AND GET Fx_gauss & Fy_gauss AS OUTPUTS WITH KERNEL SIZE 5X5
-	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 1, 0);
-	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 0, 1);
+	GaussianBlur(Fx, Fx_gauss, Size(1, 3), 1, 0);
+	GaussianBlur(Fy, Fy_gauss, Size(3, 1), 0, 1);
+
+
+	vector<pair<float, float>> vec;
 	for (int m = 0; m < height; m++)
 	{
 		for (int n = 0; n < width; n++)
 		{
 			smoothed.at<float>(m, n) = 0.5*fastAtan2(Fy_gauss.at<float>(m, n), Fx_gauss.at<float>(m, n))*CV_PI / 180;
-			if ((m%blockSize) == 0 && (n%blockSize) == 0) {
+			if ((m%blockSize) == blockSize/2 && (n%blockSize) == blockSize/2) {
 				int x = n;
 				int y = m;
 				int ln = sqrt(2 * pow(blockSize, 2)) / 2;
 				float dx = ln * cos(smoothed.at<float>(m, n) - CV_PI / 2);
 				float dy = ln * sin(smoothed.at<float>(m, n) - CV_PI / 2);
-				arrowedLine(fprintWithDirectionsSmoo, Point(x, y + blockH), Point(x + dx, y + blockW + dy), Scalar::all(255), 1, LINE_AA, 0, 0.06*blockSize);
+				vec.push_back({ dx,dy });
+				line(fprintWithDirectionsSmoo, Point(x, y + blockH), Point(x + dx, y + blockW + dy), Scalar::all(255), 1, LINE_AA, 0 /*, 0.06*blockSize*/);
+//				imshow("temp", fprintWithDirectionsSmoo);
+//				waitKey(0);
 			}
 		}
 	}///for2
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
-//	imshow("Orientation field", orientationMap);
+	// imshow("Orientation field", orientationMap);
 
-//	orientationMap = smoothed.clone();
+	//	orientationMap = smoothed.clone();
 
 	normalize(smoothed, smoothed, 0, 1, NORM_MINMAX);
 
-	//imshow("Smoothed orientation field", smoothed);
-	//imshow("Coherence", coherence);
+	// imshow("Smoothed orientation field", smoothed);
+	// imshow("Coherence", coherence);
 	// imshow("Orientation", fprintWithDirectionsSmoo);
-	pair<Mat,Mat> returning = { fprintWithDirectionsSmoo, orientationMap };
+	pair<Mat, vector<pair<float, float>>> returning = { fprintWithDirectionsSmoo, vec };
 	return returning;
 }
 

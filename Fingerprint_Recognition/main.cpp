@@ -12,17 +12,22 @@ using namespace std;
 using namespace cv;
 
 int main() {
-	Mat src = imread("image/etc/1.bmp");
+	int block_size = 9;
+	Mat src = imread("image/etc/2.bmp");
+
+//	Mat segmented;
+//	cvtColor(src, src, COLOR_BGR2GRAY);
+//	adaptiveThreshold(src, segmented, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, 2);
+//	threshold(src, segmented, 180, 255, THRESH_BINARY);
+//	cvtColor(segmented, segmented, COLOR_GRAY2BGR);
 
 	Mat segmented = segmentation(src);
 
-	pair<Mat, Mat> returned = orientation(segmented, 7);
-
+	pair<Mat, vector<pair<float, float>>> returned = orientation(segmented, block_size);
 	Mat show = returned.first;
+	vector<pair<float, float>> vec = returned.second;
 
-	Mat orientationMap = returned.second;
-
-	Mat gabored = gabor(segmented);
+	Mat gabored = gabor(segmented, vec, block_size);
 
 	Mat thinned = thinning(gabored);
 
@@ -35,9 +40,6 @@ int main() {
 
 	pyrUp(show, show);
 	imshow("show", show);
-
-	pyrUp(orientationMap, orientationMap);
-	imshow("orientationMap", orientationMap);
 
 	gabored.convertTo(gabored, CV_8U);
 	pyrUp(gabored, gabored);
