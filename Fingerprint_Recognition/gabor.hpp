@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv;
 
-Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
+Mat gabor(Mat src, vector<pair<pair<float, float>,int>>& vec, int block_size) {
 	Mat dst = Mat::zeros(src.rows, src.cols, CV_32F);
 
 	int size = 10;
@@ -21,15 +21,20 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 	int height = src.rows;
 	int width = src.cols;
 	int index = 0;
+
 	for (int m = 0; m < height; m++)
 	{
 		for (int n = 0; n < width; n++)
 		{
 			if ((m % block_size) == 0 && (n % block_size) == 0) {
-				float dx = vec[index].first;
-				float dy = vec[index].second;
+				float dx = vec[index].first.first;
+				float dy = vec[index].first.second;
+				int cnt = vec[index].second;
+
 				theta = atan2f(dy, dx) + CV_PI / 2;
-				
+				cout << index + 1 << "} " << dx << ", " << dy << ": " << cnt << endl;
+
+
 				Mat temp;
 				Mat gabor = getGaborKernel({ size, size }, sigma, theta, lambd, gamma, psi);
 				filter2D(src, temp, CV_32F, gabor);
@@ -38,25 +43,38 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 				int temp_size = block_size - 1;
 				if (width < n + temp_size)
 					temp_size = (width - 1) - n;
-				if (height < m + block_size - 1 && temp_size > (height - 1) - m)
+				if (height < m + block_size - 1 && temp_size >(height - 1) - m)
 					temp_size = (height - 1) - m;
 
+//				cout << vec[index].first << ", " << vec[index].second << endl;
+//				cout << ttemp << endl;
+
 				Mat ttemp = temp;
+//				if ((cnt % 2 == 0 )&& dy < 0 || (cnt%2==1)&&dy>0)
+//					threshold(ttemp, ttemp, 254, 255, THRESH_BINARY);
 
 				for (int i = 0; i < height; i++) {
 					for (int j = 0; j < width; j++) {
 						if(m <= i && i <= m + temp_size && n <= j && j <= n + temp_size)
-							ttemp.at<float>(i, j) = 1000*  temp.at<float>(i, j);
+							dst.at<float>(i, j) = ttemp.at<float>(i, j);
 					}
 				}
-				dst += ttemp;
+
+//				cout << index + 1 << "} " << dx << ", " << dy << ": " << theta << endl;
+				Mat dst_temp;
+				pyrUp(dst, dst_temp);
+				pyrUp(dst_temp, dst_temp);
+				dst_temp.convertTo(dst_temp, CV_8U);
+				imshow("ddddst", dst_temp);
+				waitKey(0);
+
 
 				index++;
 			}
 		}
 	}
+//	threshold(dst, dst, 80, 255, THRESH_BINARY_INV);
 	dst.convertTo(dst, CV_8U);
-	threshold(dst, dst, 80, 255, THRESH_BINARY_INV);
 
 	return dst;
 	dst = Mat::zeros(src.rows, src.cols, CV_32F);

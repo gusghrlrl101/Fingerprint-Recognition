@@ -15,8 +15,14 @@ Scalar white = CV_RGB(255, 255, 255);
 Scalar green = CV_RGB(0, 255, 0);
 
 int main() {
-	int block_size = 9;
+	int block_size = 10;
 	Mat src = imread("image/etc/2.bmp");
+	resize(src, src, { 160, 200 });
+
+	Mat temp_src;
+	pyrUp(src, temp_src);
+	pyrUp(temp_src, temp_src);
+	imshow("temp_src", temp_src);
 
 //	Mat segmented;
 //	cvtColor(src, src, COLOR_BGR2GRAY);
@@ -25,10 +31,11 @@ int main() {
 //	cvtColor(segmented, segmented, COLOR_GRAY2BGR);
 
 	Mat segmented = segmentation(src);
+	imshow("segmented", segmented);
 
-	pair<Mat, vector<pair<float, float>>> returned = orientation(segmented, block_size);
+	pair<Mat, vector<pair<pair<float, float>,int>>> returned = orientation(segmented, block_size);
 	Mat show = returned.first;
-	vector<pair<float, float>> vec = returned.second;
+	vector<pair<pair<float, float>,int>> vec = returned.second;
 
 	Mat gabored = gabor(segmented, vec, block_size);
 
