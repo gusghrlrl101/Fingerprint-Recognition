@@ -7,6 +7,7 @@
 #include "orientation.hpp"
 #include "segmentation.hpp"
 #include "thinning.hpp"
+#include "Minutiae.hpp"
 
 using namespace std;
 using namespace cv;
@@ -15,9 +16,9 @@ Scalar white = CV_RGB(255, 255, 255);
 Scalar green = CV_RGB(0, 255, 0);
 
 int main() {
-	int block_size = 10;
-	Mat src = imread("image/etc/2.bmp");
-	resize(src, src, { 160, 200 });
+	int block_size = 7;
+	Mat src = imread("image/etc/1.bmp");
+	resize(src, src, { 154, 203 });
 
 	Mat temp_src;
 	pyrUp(src, temp_src);
@@ -41,7 +42,11 @@ int main() {
 
 	Mat imgt = thinning(gabored);
 
-	Mat harris_corners;
+	FindMinutiae(imgt);
+
+	Mat result;
+
+	MinutiaeCheck(imgt, result);
 
 	pyrUp(src, src);
 	imshow("src", src);
@@ -60,6 +65,10 @@ int main() {
 	imgt.convertTo(imgt, CV_8U);
 	pyrUp(imgt, imgt);
 	imshow("thinned", imgt);
+
+//	imgt.convertTo(imgt, CV_8U);
+	pyrUp(result, result);
+	imshow("thinned", result);
 	
 	waitKey(0);
 }
