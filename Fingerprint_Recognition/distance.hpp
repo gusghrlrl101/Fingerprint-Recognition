@@ -10,10 +10,11 @@ using namespace cv;
 using namespace std;
 
 //TODO : Real World로의 거리 표현 필요
+//TODO : Pt1과 Pt2의 위치에 따라서 분기 필요
 
-void distance(Mat& src, Point pt1, Point pt2) {
-	cv::cvtColor(src, src, COLOR_BGR2GRAY); // Gray Version
-	threshold(src, src, 127, 255, THRESH_BINARY); // 임시 threshold
+void distance(Mat& src, Point& pt1, Point& pt2) {
+	//cv::cvtColor(src, src, COLOR_BGR2GRAY); // Gray Version
+	//threshold(src, src, 127, 255, THRESH_BINARY); // 임시 threshold
 
 	//Point pt1(120, 100), pt2(300, 500); // 최초 두 점 정의
 
