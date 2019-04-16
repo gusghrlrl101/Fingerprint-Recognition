@@ -32,7 +32,7 @@ Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
 				int cnt = vec[index].second;
 
 				theta = atan2f(dy, dx) + CV_PI / 2;
-				cout << index + 1 << "} " << dx << ", " << dy << ": " << cnt << endl;
+				//cout << index + 1 << "} " << dx << ", " << dy << ": " << cnt << endl;
 
 				Mat temp;
 				Mat gabor = getGaborKernel({ size, size }, sigma, theta, lambd, gamma, psi);
