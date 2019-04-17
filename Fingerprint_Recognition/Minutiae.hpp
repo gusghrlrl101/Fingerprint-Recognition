@@ -13,8 +13,7 @@ struct Minutiae {
 	int type; //ending:1  bifurcation:2  core:3  delta:4 
 };
 
-vector<Minutiae> FindMinutiae(cv::Mat& img)
-{
+vector<Minutiae> findMinutiae(Mat img) {
 	CV_Assert(img.channels() == 1);
 	CV_Assert(img.depth() != sizeof(uchar));
 	CV_Assert(img.rows > 3 && img.cols > 3);
@@ -234,26 +233,21 @@ vector<Minutiae> FindMinutiae(cv::Mat& img)
 }
 
 
-
-
-void MinutiaeCheck(const cv::Mat& src, cv::Mat& dst)
-{
-	dst = src.clone();
-	dst /= 255;         // convert to binary image
-
+Mat printMinutiae(const cv::Mat& src) {
+	Mat dst = src.clone();
 	cv::Mat prev = cv::Mat::zeros(dst.size(), CV_8UC1);
 	cv::Mat diff;
 
-
-	vector<Minutiae> mVector = FindMinutiae(dst);
+	dst /= 255;
+	vector<Minutiae> mVector = findMinutiae(dst);
 	dst *= 255;
+
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
 
 	Scalar end = Scalar(000, 000, 255);
 	Scalar bif = Scalar(204, 051, 000);
 	Scalar core = Scalar(000, 255, 255);
 	Scalar delta = Scalar(000, 204, 204);
-
 
 
 	for (int i = 0; i < mVector.size(); i++) {
@@ -263,4 +257,5 @@ void MinutiaeCheck(const cv::Mat& src, cv::Mat& dst)
 		else if (mVector[i].type == 4) circle(dst, Point(mVector[i].x, mVector[i].y), 5, delta, 1, 8);
 	}
 
+	return dst;
 }
