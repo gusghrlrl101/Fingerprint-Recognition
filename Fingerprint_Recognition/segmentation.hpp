@@ -40,7 +40,7 @@ Mat segmentation(Mat src) {
 	// Normalize the distance image for range = {0.0, 1.0}
 	// so we can visualize and threshold it
 	normalize(dist, dist, 0, 1.0, NORM_MINMAX);
-	threshold(dist, dist, 0.4, 1.0, THRESH_BINARY_INV);
+	threshold(dist, dist, 0.1, 1.0, THRESH_BINARY_INV);
 
 	Mat kernel1 = Mat::ones(3, 3, CV_8U);
 	dilate(dist, dist, kernel1);
