@@ -19,9 +19,9 @@ Scalar green = CV_RGB(0, 255, 0);
 
 
 int main() {
-	int block_size = 9;
-	Mat src = imread("image/etc/21.bmp");
-	resize(src, src, { 153, 198 });
+	int block_size = 7;
+	Mat src = imread("image/etc/22.bmp");
+	resize(src, src, { 154, 203 });
 
 	Mat temp_src;
 	pyrUp(src, temp_src);
@@ -29,7 +29,7 @@ int main() {
 	imshow("temp_src", temp_src);
 
 //	Mat segmented;
-	//cvtColor(src, src, COLOR_BGR2GRAY);
+//	cvtColor(src, src, COLOR_BGR2GRAY);
 //	adaptiveThreshold(src, segmented, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, 2);
 //	threshold(src, segmented, 180, 255, THRESH_BINARY);
 //	cvtColor(segmented, segmented, COLOR_GRAY2BGR);
