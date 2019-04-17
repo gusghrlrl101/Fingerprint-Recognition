@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -7,31 +8,48 @@
 #include "orientation.hpp"
 #include "segmentation.hpp"
 #include "thinning.hpp"
+#include "Minutiae.hpp"
+#include "distance.hpp"
 
 using namespace std;
 using namespace cv;
 
-Scalar white = CV_RGB(255, 255, 255);
-Scalar green = CV_RGB(0, 255, 0);
-
 int main() {
-	Mat color;
+	// orientation block size
+	int block_size = 7;
+
 	Mat src = imread("image/etc/1.bmp");
-	cvtColor(src, color, COLOR_RGB2GRAY);
+
+	// rows, cols must be devided by block size
+	resize(src, src, { 154, 203 });
+
+	Mat pyup_src;
+	pyrUp(src, pyup_src);
+	pyrUp(pyup_src, pyup_src);
+	imshow("pyup_src", pyup_src);
+
+//	Mat segmented;
+//	cvtColor(src, src, COLOR_BGR2GRAY);
+//	adaptiveThreshold(src, segmented, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, 2);
+//	threshold(src, segmented, 180, 255, THRESH_BINARY);
+//	cvtColor(segmented, segmented, COLOR_GRAY2BGR);
 
 	Mat segmented = segmentation(src);
+	imshow("segmented", segmented);
 
-	pair<Mat, Mat> returned = orientation(segmented, 7);
-
+	pair<Mat, vector<pair<float, float>>> returned = orientation(segmented, block_size);
 	Mat show = returned.first;
+	vector<pair<float, float>> vec = returned.second;
 
-	Mat orientationMap = returned.second;
-
-	Mat gabored = gabor(segmented);
+	Mat gabored = gabor(segmented, vec, block_size);
 
 	Mat imgt = thinning(gabored);
 
-	Mat harris_corners;
+	Mat temp_src, temp_dst;
+	imgt.convertTo(temp_src, CV_8U);
+
+	Mat result = printMinutiae(imgt);
+//	calculate(imgt);
 
 	pyrUp(src, src);
 	imshow("src", src);
@@ -43,9 +61,6 @@ int main() {
 	pyrUp(show, show);
 	imshow("show", show);
 
-	pyrUp(orientationMap, orientationMap);
-	imshow("orientationMap", orientationMap);
-
 	gabored.convertTo(gabored, CV_8U);
 	pyrUp(gabored, gabored);
 	imshow("gabored", gabored);
@@ -53,6 +68,10 @@ int main() {
 	imgt.convertTo(imgt, CV_8U);
 	pyrUp(imgt, imgt);
 	imshow("thinned", imgt);
-	
+
+	pyrUp(result, result);
+	imshow("check", result);
+
 	waitKey(0);
+	return 0;
 }

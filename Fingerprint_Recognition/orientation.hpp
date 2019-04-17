@@ -12,7 +12,7 @@ using namespace cv;
 
 // gray 변환 후 CV_32F로 변환 필요
 
-pair<Mat,Mat> orientation(Mat src, int size = 8)
+pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 {
 	Mat inputImage = src;
 
@@ -41,7 +41,7 @@ pair<Mat,Mat> orientation(Mat src, int size = 8)
 	Sobel(inputImage, grad_y, inputImage.depth(), 0, 1, 3);
 	//CASE:2- USE SCHARR OPERATOR OPENCV SYNTAX (INPUT IMAGE, SCHARR_OUTPUT, OTHER PARAMETERS) --> APPLY BOTH X-DIRECTION & Y-DIRECTION  
 	//NOTE: WHEN YOU EXECUTE THE PROGRAM USE CASE:1 OR CASE:2 NOT BOTH AT THE SAME TIME
-
+	
 	//Vector vield
 	Mat Fx(inputImage.size(), inputImage.type()),
 		Fy(inputImage.size(), inputImage.type()),
@@ -55,6 +55,8 @@ pair<Mat,Mat> orientation(Mat src, int size = 8)
 	int blockH;
 	int blockW;
 
+	vector<pair<float, float>> vec;
+	vector<int> cnt;
 	//select block
 	for (int i = 0; i < height; i += blockSize)
 	{
@@ -87,6 +89,7 @@ pair<Mat,Mat> orientation(Mat src, int size = 8)
 
 			Fx.at<float>(i, j) = cos(2 * fi);
 			Fy.at<float>(i, j) = sin(2 * fi);
+			
 
 			//fill blocks
 			for (int u = i; u < i + blockH; u++)
@@ -106,8 +109,9 @@ pair<Mat,Mat> orientation(Mat src, int size = 8)
 	  // TO DO#3:
 
 	  // DO GAUSSIAN BLUR SMOOTHING (BOTH IN X & Y DIRECTIONS) --> TAKE Fx & Fy AS INPUTS AND GET Fx_gauss & Fy_gauss AS OUTPUTS WITH KERNEL SIZE 5X5
-	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 1, 0);
-	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 0, 1);
+	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 1, 1);
+	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 1, 1);
+
 	for (int m = 0; m < height; m++)
 	{
 		for (int n = 0; n < width; n++)
@@ -119,21 +123,36 @@ pair<Mat,Mat> orientation(Mat src, int size = 8)
 				int ln = sqrt(2 * pow(blockSize, 2)) / 2;
 				float dx = ln * cos(smoothed.at<float>(m, n) - CV_PI / 2);
 				float dy = ln * sin(smoothed.at<float>(m, n) - CV_PI / 2);
-				arrowedLine(fprintWithDirectionsSmoo, Point(x, y + blockH), Point(x + dx, y + blockW + dy), Scalar::all(255), 1, LINE_AA, 0, 0.06*blockSize);
+				//				cout << m << ", " << n << ": " << dx << ", " << dy << endl;
+				vec.push_back({ dx,dy });
+
+				float my = dy / (dx + FLT_EPSILON);
+
+				int xx = (blockH / 2) / sqrt(pow(my, 2) + 1);
+				int yy = my * xx;
+//				cout << xx << ", " << yy << endl;
+
+				int mid_x = n + blockH / 2;
+				int mid_y = m + blockH / 2;
+				if (xx == 0 && yy == 0)
+					yy = blockH / 2;
+				
+
+				line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0 /*, 0.06*blockSize*/);
 			}
 		}
 	}///for2
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
-//	imshow("Orientation field", orientationMap);
+	// imshow("Orientation field", orientationMap);
 
-//	orientationMap = smoothed.clone();
+	orientationMap = smoothed.clone();
 
 	normalize(smoothed, smoothed, 0, 1, NORM_MINMAX);
 
-	//imshow("Smoothed orientation field", smoothed);
-	//imshow("Coherence", coherence);
+	// imshow("Smoothed orientation field", smoothed);
+	// imshow("Coherence", coherence);
 	// imshow("Orientation", fprintWithDirectionsSmoo);
-	pair<Mat,Mat> returning = { fprintWithDirectionsSmoo, orientationMap };
+	pair<Mat, vector<pair<float, float>>> returning = { fprintWithDirectionsSmoo, vec };
 	return returning;
 }
 
