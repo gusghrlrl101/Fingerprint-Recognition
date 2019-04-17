@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv;
 
-Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
+Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 	Mat dst = Mat::zeros(src.rows, src.cols, CV_32F);
 
 	int size = 15;
@@ -27,9 +27,8 @@ Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
 		for (int n = 0; n < width; n++)
 		{
 			if ((m % block_size) == 0 && (n % block_size) == 0) {
-				float dx = vec[index].first.first;
-				float dy = vec[index].first.second;
-				int cnt = vec[index].second;
+				float dx = vec[index].first;
+				float dy = vec[index].second;
 
 				theta = atan2f(dy, dx) + CV_PI / 2;
 				//cout << index + 1 << "} " << dx << ", " << dy << ": " << cnt << endl;

@@ -12,7 +12,7 @@ using namespace cv;
 
 // gray 변환 후 CV_32F로 변환 필요
 
-pair<Mat, vector<pair<pair<float, float>,int>>> orientation(Mat src, int size = 8)
+pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 {
 	Mat inputImage = src;
 
@@ -55,7 +55,7 @@ pair<Mat, vector<pair<pair<float, float>,int>>> orientation(Mat src, int size = 
 	int blockH;
 	int blockW;
 
-	vector<pair<pair<float, float>,int>> vec;
+	vector<pair<float, float>> vec;
 	vector<int> cnt;
 	//select block
 	for (int i = 0; i < height; i += blockSize)
@@ -81,19 +81,6 @@ pair<Mat, vector<pair<pair<float, float>,int>>> orientation(Mat src, int size = 
 					Gxx += grad_x.at<float>(u, v)*grad_x.at<float>(u, v);
 					Gyy += grad_y.at<float>(u, v)*grad_y.at<float>(u, v);
 				}
-			}
-
-			if (Gsx > 0) {
-				if (Gsy > 0)
-					cnt.push_back(0);
-				else
-					cnt.push_back(1);
-			}
-			else {
-				if (Gsy > 0)
-					cnt.push_back(2);
-				else
-					cnt.push_back(3);
 			}
 
 			float coh = sqrt(pow(Gsx, 2) + pow(Gsy, 2)) / (Gxx + Gyy);
@@ -125,7 +112,6 @@ pair<Mat, vector<pair<pair<float, float>,int>>> orientation(Mat src, int size = 
 	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 1, 1);
 	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 1, 1);
 
-	int index = 0;
 	for (int m = 0; m < height; m++)
 	{
 		for (int n = 0; n < width; n++)
@@ -138,7 +124,7 @@ pair<Mat, vector<pair<pair<float, float>,int>>> orientation(Mat src, int size = 
 				float dx = ln * cos(smoothed.at<float>(m, n) - CV_PI / 2);
 				float dy = ln * sin(smoothed.at<float>(m, n) - CV_PI / 2);
 				//				cout << m << ", " << n << ": " << dx << ", " << dy << endl;
-				vec.push_back({ { dx,dy }, cnt[index++] });
+				vec.push_back({ dx,dy });
 
 				float my = dy / (dx + FLT_EPSILON);
 
@@ -166,7 +152,7 @@ pair<Mat, vector<pair<pair<float, float>,int>>> orientation(Mat src, int size = 
 	// imshow("Smoothed orientation field", smoothed);
 	// imshow("Coherence", coherence);
 	// imshow("Orientation", fprintWithDirectionsSmoo);
-	pair<Mat, vector<pair<pair<float, float>,int>>> returning = { fprintWithDirectionsSmoo, vec };
+	pair<Mat, vector<pair<float, float>>> returning = { fprintWithDirectionsSmoo, vec };
 	return returning;
 }
 

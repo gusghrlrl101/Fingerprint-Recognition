@@ -14,19 +14,19 @@
 using namespace std;
 using namespace cv;
 
-Scalar white = CV_RGB(255, 255, 255);
-Scalar green = CV_RGB(0, 255, 0);
-
-
 int main() {
+	// orientation block size
 	int block_size = 7;
-	Mat src = imread("image/etc/22.bmp");
+
+	Mat src = imread("image/etc/1.bmp");
+
+	// rows, cols must be devided by block size
 	resize(src, src, { 154, 203 });
 
-	Mat temp_src;
-	pyrUp(src, temp_src);
-	pyrUp(temp_src, temp_src);
-	imshow("temp_src", temp_src);
+	Mat pyup_src;
+	pyrUp(src, pyup_src);
+	pyrUp(pyup_src, pyup_src);
+	imshow("pyup_src", pyup_src);
 
 //	Mat segmented;
 //	cvtColor(src, src, COLOR_BGR2GRAY);
@@ -37,13 +37,16 @@ int main() {
 	Mat segmented = segmentation(src);
 	imshow("segmented", segmented);
 
-	pair<Mat, vector<pair<pair<float, float>,int>>> returned = orientation(segmented, block_size);
+	pair<Mat, vector<pair<float, float>>> returned = orientation(segmented, block_size);
 	Mat show = returned.first;
-	vector<pair<pair<float, float>,int>> vec = returned.second;
+	vector<pair<float, float>> vec = returned.second;
 
 	Mat gabored = gabor(segmented, vec, block_size);
 
 	Mat imgt = thinning(gabored);
+
+	Mat temp_src, temp_dst;
+	imgt.convertTo(temp_src, CV_8U);
 
 	Mat result = printMinutiae(imgt);
 //	calculate(imgt);
