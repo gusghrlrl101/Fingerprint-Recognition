@@ -31,7 +31,7 @@ Mat segmentation(Mat src) {
 	Mat bw;
 	cvtColor(imgResult, bw, COLOR_BGR2GRAY);
 	threshold(bw, bw, 50, 255, THRESH_BINARY | THRESH_OTSU);
-	// imshow("Binary Image", bw);
+	//	imshow("Binary Image", bw);
 
 	// Perform the distance transform algorithm
 	Mat dist;
@@ -42,14 +42,22 @@ Mat segmentation(Mat src) {
 	normalize(dist, dist, 0, 1.0, NORM_MINMAX);
 	threshold(dist, dist, 0.1, 1.0, THRESH_BINARY_INV);
 
+	/*
 	Mat kernel1 = Mat::ones(3, 3, CV_8U);
 	dilate(dist, dist, kernel1);
-	dist.convertTo(dist, CV_8U);
+	Mat temp;
+	dist.convertTo(temp, CV_32F);
+	threshold(temp, temp, 0.05, 1.0, THRESH_BINARY_INV);
+	dilate(temp, temp, kernel1, Point(-1,-1), 2);
+	threshold(temp, temp, 0.05, 1.0, THRESH_BINARY_INV);
 
+	imshow("tempppp", temp);
+	dist.convertTo(dist, CV_8U);
 	Mat result;
 	copyTo(src, result, dist);
-
-	return result;
+	imshow("resultt", result);
+	*/
+	return dist;
 }
 
 #endif

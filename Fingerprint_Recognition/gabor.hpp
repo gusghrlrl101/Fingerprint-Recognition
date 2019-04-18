@@ -80,7 +80,7 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 
 	dst.convertTo(dst, CV_8U);
 	imshow("ddddst", dst);
-	threshold(dst, dst, 1, 255, THRESH_BINARY);
+	threshold(dst, dst, 1, 255, THRESH_BINARY_INV);
 //	adaptiveThreshold(dst, dst, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, 5);
 
 	return dst;

@@ -7,11 +7,14 @@
 using namespace std;
 using namespace cv;
 
+
 struct Minutiae {
 	int x;
 	int y;
-	int type; //ending:1  bifurcation:2  core:3  delta:4 
+	int angle;
+	int type; //ending:1  bifurcation:2
 };
+
 
 vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 	CV_Assert(img.channels() == 1);
@@ -22,13 +25,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 
 
 	Mat seg;
-	original.convertTo(seg, CV_8UC1);
-
-	Mat mask = getStructuringElement(1, Size(3, 3), Point(1, 1));
-	morphologyEx(seg, seg, MORPH_OPEN, mask, Point(-1, -1), 12);
-	threshold(seg, seg, 100, 255, THRESH_BINARY_INV);
-	erode(seg, seg, mask, Point(-1, -1), 7);
-
+	original.convertTo(seg, CV_32F);
 
 	int ending = 0;
 	int bifurcation = 0;
@@ -83,8 +80,8 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 			int and_ = (*a & *b) + (*b & *c) + (*c & *f) + (*f & *i) + (*d & *g) + (*g & *h) + (*h & *i) + (*d & *a);
 
 			if (*e == 1 && (sum == 1)) {
-				uchar* segVal = &(seg.ptr<uchar>(y))[x];
-				if (*segVal == 255) {
+				float* segVal = &(seg.ptr<float>(y))[x];
+				if (*segVal == 1.0) {
 					ending++;
 					minutiae.x = x; minutiae.y = y;
 					minutiae.type = 1;
@@ -92,15 +89,14 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 				}
 			}
 			if (*e == 1 && (xor_ == 6 || (xor_ == 6 && and_ == 2))) {
-				uchar* segVal = &(seg.ptr<uchar>(y))[x];
-				if (*segVal == 255) {
+				float* segVal = &(seg.ptr<float>(y))[x];
+				if (*segVal == 1.0) {
 					bifurcation++;
 					minutiae.x = x; minutiae.y = y;
 					minutiae.type = 2;
 					mVector.push_back(minutiae);
 				}
 			}
-
 		}
 	}
 	cout << "ending: " << ending << ", bifurcation: " << bifurcation << endl;
@@ -119,9 +115,9 @@ Mat printMinutiae(const Mat& src, Mat& original) {
 	vector<Minutiae> mVector = findMinutiae(dst, original);
 	dst *= 255;
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
-
-	Scalar end = Scalar(255, 255, 000);
-	Scalar bif = Scalar(000, 255, 255);
+	
+	Scalar end = Scalar(000, 255, 255);
+	Scalar bif = Scalar(255, 255, 000);
 
 	for (int i = 0; i < mVector.size(); i++) {
 		if (mVector[i].type == 1)
