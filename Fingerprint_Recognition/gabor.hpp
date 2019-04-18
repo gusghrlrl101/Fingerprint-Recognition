@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv;
 
-Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
+Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 	Mat dst = Mat::zeros(src.rows, src.cols, CV_32F);
 
 	int size = 15;
@@ -27,12 +27,11 @@ Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
 		for (int n = 0; n < width; n++)
 		{
 			if ((m % block_size) == 0 && (n % block_size) == 0) {
-				float dx = vec[index].first.first;
-				float dy = vec[index].first.second;
-				int cnt = vec[index].second;
+				float dx = vec[index].first;
+				float dy = vec[index].second;
 
 				theta = atan2f(dy, dx) + CV_PI / 2;
-				cout << index + 1 << "} " << dx << ", " << dy << ": " << cnt << endl;
+				//cout << index + 1 << "} " << dx << ", " << dy << ": " << cnt << endl;
 
 				Mat temp;
 				Mat gabor = getGaborKernel({ size, size }, sigma, theta, lambd, gamma, psi);
@@ -42,7 +41,7 @@ Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
 //				pyrUp(gabor, gabor);
 //				imshow("gabor", gabor);
 				
-				cvtColor(temp, temp, COLOR_BGR2GRAY);
+//				cvtColor(temp, temp, COLOR_BGR2GRAY);
 
 				int temp_size = block_size - 1;
 				if (width < n + temp_size)
@@ -81,7 +80,7 @@ Mat gabor(Mat src, vector<pair<pair<float, float>, int>>& vec, int block_size) {
 
 	dst.convertTo(dst, CV_8U);
 	imshow("ddddst", dst);
-	threshold(dst, dst, 1, 255, THRESH_BINARY);
+	threshold(dst, dst, 1, 255, THRESH_BINARY_INV);
 //	adaptiveThreshold(dst, dst, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, 5);
 
 	return dst;

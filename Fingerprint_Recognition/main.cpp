@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -8,52 +9,51 @@
 #include "segmentation.hpp"
 #include "thinning.hpp"
 #include "Minutiae.hpp"
+#include "distance.hpp"
 
 using namespace std;
 using namespace cv;
 
-Scalar white = CV_RGB(255, 255, 255);
-Scalar green = CV_RGB(0, 255, 0);
-
 int main() {
+	// orientation block size
 	int block_size = 7;
-	Mat src = imread("image/etc/1.bmp");
-	resize(src, src, { 154, 203 });
 
-	Mat temp_src;
-	pyrUp(src, temp_src);
-	pyrUp(temp_src, temp_src);
-	imshow("temp_src", temp_src);
+	Mat src = imread("image/Team1/2019_1_1_L_R_1.bmp");
+	Size size = { 154,203 };
+	cvtColor(src, src, COLOR_RGB2GRAY);
 
-//	Mat segmented;
-//	cvtColor(src, src, COLOR_BGR2GRAY);
-//	adaptiveThreshold(src, segmented, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 15, 2);
-//	threshold(src, segmented, 180, 255, THRESH_BINARY);
-//	cvtColor(segmented, segmented, COLOR_GRAY2BGR);
+	// rows, cols must be devided by block size
+	resize(src, src, size);
 
-	Mat segmented = segmentation(src);
+	Mat pyup_src;
+	pyrUp(src, pyup_src);
+	pyrUp(pyup_src, pyup_src);
+	imshow("pyup_src", pyup_src);
+
+	Mat segmented;
+	Mat segmented2 = segmentation(src, segmented);
+
 	imshow("segmented", segmented);
+	imshow("segmented2", segmented2);
 
-	pair<Mat, vector<pair<pair<float, float>,int>>> returned = orientation(segmented, block_size);
+	
+	pair<Mat, vector<pair<float, float>>> returned = orientation(src, block_size);
 	Mat show = returned.first;
-	vector<pair<pair<float, float>,int>> vec = returned.second;
+	vector<pair<float, float>> vec = returned.second;
 
-	Mat gabored = gabor(segmented, vec, block_size);
+	Mat gabored = gabor(src, vec, block_size);
 
 	Mat imgt = thinning(gabored);
 
-	FindMinutiae(imgt);
-
-	Mat result;
-
-	MinutiaeCheck(imgt, result);
+	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size);
+//	calculate(imgt, src);
 
 	pyrUp(src, src);
 	imshow("src", src);
 
-	segmented.convertTo(segmented, CV_8U);
-	pyrUp(segmented, segmented);
-	imshow("segmented", segmented);
+//	segmented.convertTo(segmented, CV_8U);
+//	pyrUp(segmented, segmented);
+//	imshow("segmented", segmented);
 
 	pyrUp(show, show);
 	imshow("show", show);
@@ -66,9 +66,9 @@ int main() {
 	pyrUp(imgt, imgt);
 	imshow("thinned", imgt);
 
-//	imgt.convertTo(imgt, CV_8U);
 	pyrUp(result, result);
-	imshow("thinned", result);
+	imshow("check", result);
 	
 	waitKey(0);
+	return 0;
 }
