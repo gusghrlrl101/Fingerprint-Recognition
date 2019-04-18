@@ -1,5 +1,3 @@
-#ifndef SEGMENTATION_HPP
-#define SEGMENTATION_HPP
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -9,55 +7,24 @@
 using namespace std;
 using namespace cv;
 
-Mat segmentation(Mat src) {
-	Mat kernel = (Mat_<float>(3, 3) <<
-		1, 1, 1,
-		1, -8, 1,
-		1, 1, 1);
+Mat segmentation(Mat &src, Mat &dst) {
 
-	Mat imgLaplacian;
-	filter2D(src, imgLaplacian, CV_32F, kernel);
+	src.convertTo(dst, CV_8UC1);
 
-	Mat sharp;
-	src.convertTo(sharp, CV_32F);
-	Mat imgResult = sharp - imgLaplacian;
-//	imshow("imgResult", imgResult);
+	Mat mask = getStructuringElement(1, Size(3, 3), Point(1, 1));
+//	adaptiveThreshold(dst, dst, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 13, 3);
 
-	// convert back to 8bits gray scale
-	imgResult.convertTo(imgResult, CV_8UC3);
-	imgLaplacian.convertTo(imgLaplacian, CV_8UC3);
+	imshow("before dst", dst);
+	erode(dst, dst, mask);
 
-	// Create binary image from source image
-	Mat bw;
-	cvtColor(imgResult, bw, COLOR_BGR2GRAY);
-	threshold(bw, bw, 50, 255, THRESH_BINARY | THRESH_OTSU);
-	//	imshow("Binary Image", bw);
+	Mat seg;
 
-	// Perform the distance transform algorithm
-	Mat dist;
-	distanceTransform(bw, dist, DIST_L2, 3);
+	morphologyEx(dst, seg, MORPH_OPEN, mask, Point(-1, -1), 12);
+	imshow("seg", seg);
+	imshow("dst", dst);
+	Mat seg_inv;
+	threshold(seg, seg_inv, 70, 255, THRESH_BINARY_INV);
 
-	// Normalize the distance image for range = {0.0, 1.0}
-	// so we can visualize and threshold it
-	normalize(dist, dist, 0, 1.0, NORM_MINMAX);
-	threshold(dist, dist, 0.1, 1.0, THRESH_BINARY_INV);
 
-	/*
-	Mat kernel1 = Mat::ones(3, 3, CV_8U);
-	dilate(dist, dist, kernel1);
-	Mat temp;
-	dist.convertTo(temp, CV_32F);
-	threshold(temp, temp, 0.05, 1.0, THRESH_BINARY_INV);
-	dilate(temp, temp, kernel1, Point(-1,-1), 2);
-	threshold(temp, temp, 0.05, 1.0, THRESH_BINARY_INV);
-
-	imshow("tempppp", temp);
-	dist.convertTo(dist, CV_8U);
-	Mat result;
-	copyTo(src, result, dist);
-	imshow("resultt", result);
-	*/
-	return dist;
+	return seg;
 }
-
-#endif

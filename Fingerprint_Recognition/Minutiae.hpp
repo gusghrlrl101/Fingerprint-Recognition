@@ -3,17 +3,22 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <math.h>
+
 
 using namespace std;
 using namespace cv;
 
+
 struct Minutiae {
 	int x;
 	int y;
-	int type; //ending:1  bifurcation:2  core:3  delta:4 
+	int angle;
+	int type; //ending:1  bifurcation:2
 };
 
-vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
+
+vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 	CV_Assert(img.channels() == 1);
 	CV_Assert(img.depth() != sizeof(uchar));
 	CV_Assert(img.rows > 3 && img.cols > 3);
@@ -21,14 +26,10 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 	cv::Mat marker = cv::Mat::zeros(img.size(), CV_8UC1);
 
 
-	Mat seg;
-	original.convertTo(seg, CV_8UC1);
-
+	Mat area;
+	seg.convertTo(area, CV_8UC1);
 	Mat mask = getStructuringElement(1, Size(3, 3), Point(1, 1));
-	morphologyEx(seg, seg, MORPH_OPEN, mask, Point(-1, -1), 12);
-	threshold(seg, seg, 100, 255, THRESH_BINARY_INV);
-	erode(seg, seg, mask, Point(-1, -1), 7);
-
+	dilate(area, area, mask, Point(-1, -1), 7);
 
 	int ending = 0;
 	int bifurcation = 0;
@@ -84,44 +85,48 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 
 			int thr = 5;
 			if (*e == 1 && (sum == 1)) {
-				uchar* segVal = &(seg.ptr<uchar>(y))[x];
-				if (*segVal == 255) {
-					bool isAlready = false;
-					for (auto mnt : mVector) {
-						int distt = abs(mnt.x - x) + abs(mnt.y - y);
-						if (distt <= thr) {
-							isAlready = true;
-							break;
-						}
+				uchar* segVal = &(area.ptr<uchar>(y))[x];
+				//				if (*segVal == 0) {
+				bool isAlready = false;
+				for (auto mnt : mVector) {
+					int distt = abs(mnt.x - x) + abs(mnt.y - y);
+					if (distt <= thr) {
+						isAlready = true;
+						break;
 					}
-					
-					if (!isAlready) {
+				}
+
+				if (!isAlready) {
+					if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
 						ending++;
 						minutiae.x = x; minutiae.y = y;
 						minutiae.type = 1;
 						mVector.push_back(minutiae);
 					}
 				}
+				//				}
 			}
 			if (*e == 1 && (xor_ == 6 || (xor_ == 6 && and_ == 2))) {
-				uchar* segVal = &(seg.ptr<uchar>(y))[x];
-				if (*segVal == 255) {
-					bool isAlready = false;
-					for (auto mnt : mVector) {
-						int distt = abs(mnt.x - x) + abs(mnt.y - y);
-						if (distt <= thr) {
-							isAlready = true;
-							break;
-						}
+				uchar* segVal = &(area.ptr<uchar>(y))[x];
+				//				if (*segVal == 0) {
+				bool isAlready = false;
+				for (auto mnt : mVector) {
+					int distt = abs(mnt.x - x) + abs(mnt.y - y);
+					if (distt <= thr) {
+						isAlready = true;
+						break;
 					}
+				}
 
-					if (!isAlready) {
+				if (!isAlready) {
+					if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
 						bifurcation++;
 						minutiae.x = x; minutiae.y = y;
 						minutiae.type = 2;
 						mVector.push_back(minutiae);
 					}
 				}
+				//				}
 			}
 
 		}
@@ -132,14 +137,31 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 }
 
 
-Mat printMinutiae(const Mat& src, Mat& original) {
+float angle(vector<pair<float, float>>& vec, int& u, int& v, int& block_size, Size size) {
+	cout << "angle: " << u << ", " << v << endl;
+	float fi = 0.0;
+
+	int width = size.width / block_size;
+	int height = size.height / block_size;
+
+	cout << width << ", " << height << endl;
+
+
+
+	return fi;
+}
+
+
+
+
+Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float,float>>& vec, int& block_size, Size size) {
 	Mat temp;
 	Mat dst = src.clone();
 	dst /= 255;         // convert to binary image
 
 	cv::Mat prev = cv::Mat::zeros(dst.size(), CV_8UC1);
 
-	vector<Minutiae> mVector = findMinutiae(dst, original);
+	vector<Minutiae> mVector = findMinutiae(dst, srcc);
 	dst *= 255;
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
 	threshold(dst, dst, 127, 255, THRESH_BINARY_INV);
@@ -152,6 +174,10 @@ Mat printMinutiae(const Mat& src, Mat& original) {
 			circle(dst, Point(mVector[i].x, mVector[i].y), 5, end, 1, 8);
 		else if (mVector[i].type == 2)
 			rectangle(dst, Point(mVector[i].x - 4, mVector[i].y - 4), Point(mVector[i].x + 4, mVector[i].y + 4), bif, 1);
+
+		cout << mVector[i].x << ", " << mVector[i].y << ": " << angle(vec, mVector[i].x, mVector[i].y, block_size, size) << endl;
+		imshow("drawing", dst);
+		waitKey(0);
 	}
 
 	return dst;

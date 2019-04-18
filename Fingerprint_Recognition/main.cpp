@@ -19,17 +19,21 @@ int main() {
 	int block_size = 7;
 
 	Mat src = imread("image/Team1/2019_1_1_L_R_1.bmp");
+	Size size = { 154,203 };
 
 	// rows, cols must be devided by block size
-	resize(src, src, { 154, 203 });
+	resize(src, src, size);
 
 	Mat pyup_src;
 	pyrUp(src, pyup_src);
 	pyrUp(pyup_src, pyup_src);
 	imshow("pyup_src", pyup_src);
 
-//	Mat segmented = segmentation(src);
-//	imshow("segmented", segmented);
+	Mat segmented;
+	Mat segmented2 = segmentation(src, segmented);
+
+	imshow("segmented", segmented);
+	imshow("segmented2", segmented2);
 
 	
 	pair<Mat, vector<pair<float, float>>> returned = orientation(src, block_size);
@@ -40,7 +44,7 @@ int main() {
 
 	Mat imgt = thinning(gabored);
 
-	Mat result = printMinutiae(imgt, gabored);
+	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size);
 //	calculate(imgt, src);
 
 	pyrUp(src, src);
