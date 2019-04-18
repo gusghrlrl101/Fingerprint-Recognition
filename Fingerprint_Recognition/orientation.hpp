@@ -16,7 +16,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 {
 	Mat inputImage = src;
 
-	cvtColor(src, inputImage, COLOR_RGB2GRAY);
+//	cvtColor(src, inputImage, COLOR_RGB2GRAY);
 	inputImage.convertTo(inputImage, CV_32F, 1.0 / 255, 0);
 
 	medianBlur(inputImage, inputImage, 3);

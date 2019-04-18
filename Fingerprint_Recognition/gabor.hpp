@@ -41,7 +41,7 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 //				pyrUp(gabor, gabor);
 //				imshow("gabor", gabor);
 				
-				cvtColor(temp, temp, COLOR_BGR2GRAY);
+//				cvtColor(temp, temp, COLOR_BGR2GRAY);
 
 				int temp_size = block_size - 1;
 				if (width < n + temp_size)

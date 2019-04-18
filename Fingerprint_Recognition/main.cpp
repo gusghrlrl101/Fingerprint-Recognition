@@ -20,6 +20,7 @@ int main() {
 
 	Mat src = imread("image/Team1/2019_1_1_L_R_1.bmp");
 	Size size = { 154,203 };
+	cvtColor(src, src, COLOR_RGB2GRAY);
 
 	// rows, cols must be devided by block size
 	resize(src, src, size);
