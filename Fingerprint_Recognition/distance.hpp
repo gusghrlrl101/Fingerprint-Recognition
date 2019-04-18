@@ -77,9 +77,9 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 }
 
 
-void calculate(Mat imgt) {
+void calculate(Mat imgt, Mat src) {
 	imgt /= 255;
-	vector<Minutiae> minutiaes = findMinutiae(imgt);
+	vector<Minutiae> minutiaes = findMinutiae(imgt, src);
 	imgt *= 255;
 
 	vector<Point> ending;

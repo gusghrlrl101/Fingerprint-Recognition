@@ -13,13 +13,22 @@ struct Minutiae {
 	int type; //ending:1  bifurcation:2  core:3  delta:4 
 };
 
-vector<Minutiae> findMinutiae(cv::Mat& img)
-{
+vector<Minutiae> findMinutiae(Mat& img, Mat& original) {
 	CV_Assert(img.channels() == 1);
 	CV_Assert(img.depth() != sizeof(uchar));
 	CV_Assert(img.rows > 3 && img.cols > 3);
 
 	cv::Mat marker = cv::Mat::zeros(img.size(), CV_8UC1);
+
+
+	Mat seg;
+	original.convertTo(seg, CV_8UC1);
+
+	Mat mask = getStructuringElement(1, Size(3, 3), Point(1, 1));
+	morphologyEx(seg, seg, MORPH_OPEN, mask, Point(-1, -1), 12);
+	threshold(seg, seg, 100, 255, THRESH_BINARY_INV);
+	erode(seg, seg, mask, Point(-1, -1), 7);
+
 
 	int ending = 0;
 	int bifurcation = 0;
@@ -74,39 +83,45 @@ vector<Minutiae> findMinutiae(cv::Mat& img)
 			int and_ = (*a & *b) + (*b & *c) + (*c & *f) + (*f & *i) + (*d & *g) + (*g & *h) + (*h & *i) + (*d & *a);
 
 			if (*e == 1 && (sum == 1)) {
-				ending++;
-				minutiae.x = x; minutiae.y = y;
-				minutiae.type = 1;
-				mVector.push_back(minutiae);
+				uchar* segVal = &(seg.ptr<uchar>(y))[x];
+				if (*segVal == 255) {
+					ending++;
+					minutiae.x = x; minutiae.y = y;
+					minutiae.type = 1;
+					mVector.push_back(minutiae);
+				}
 			}
 			if (*e == 1 && (xor_ == 6 || (xor_ == 6 && and_ == 2))) {
-				bifurcation++;
-				minutiae.x = x; minutiae.y = y;
-				minutiae.type = 2;
-				mVector.push_back(minutiae);
+				uchar* segVal = &(seg.ptr<uchar>(y))[x];
+				if (*segVal == 255) {
+					bifurcation++;
+					minutiae.x = x; minutiae.y = y;
+					minutiae.type = 2;
+					mVector.push_back(minutiae);
+				}
 			}
+
 		}
 	}
 	cout << "ending: " << ending << ", bifurcation: " << bifurcation << endl;
 
 	return mVector;
-
 }
 
-Mat printMinutiae(const cv::Mat& src) {
+
+Mat printMinutiae(const Mat& src, Mat& original) {
+	Mat temp;
 	Mat dst = src.clone();
+	dst /= 255;         // convert to binary image
+
 	cv::Mat prev = cv::Mat::zeros(dst.size(), CV_8UC1);
-	cv::Mat diff;
 
-	dst /= 255;
-	vector<Minutiae> mVector = findMinutiae(dst);
+	vector<Minutiae> mVector = findMinutiae(dst, original);
 	dst *= 255;
-
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
 
 	Scalar end = Scalar(255, 255, 000);
 	Scalar bif = Scalar(000, 255, 255);
-
 
 	for (int i = 0; i < mVector.size(); i++) {
 		if (mVector[i].type == 1)

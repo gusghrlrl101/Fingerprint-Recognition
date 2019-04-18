@@ -45,11 +45,8 @@ int main() {
 
 	Mat imgt = thinning(gabored);
 
-	Mat temp_src, temp_dst;
-	imgt.convertTo(temp_src, CV_8U);
-
-	Mat result = printMinutiae(imgt);
-//	calculate(imgt);
+	Mat result = printMinutiae(imgt, gabored);
+//	calculate(imgt, src);
 
 	pyrUp(src, src);
 	imshow("src", src);
