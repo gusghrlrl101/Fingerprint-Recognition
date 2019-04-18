@@ -16,12 +16,12 @@ using namespace cv;
 
 int main() {
 	// orientation block size
-	int block_size = 9;
+	int block_size = 7;
 
 	Mat src = imread("image/Team1/2019_1_1_L_R_1.bmp");
 
 	// rows, cols must be devided by block size
-	resize(src, src, { 153, 207 });
+	resize(src, src, { 154, 203 });
 
 	Mat pyup_src;
 	pyrUp(src, pyup_src);
