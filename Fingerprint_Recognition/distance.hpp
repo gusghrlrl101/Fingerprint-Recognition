@@ -100,16 +100,6 @@ void calculate(Mat imgt, Mat src) {
 			bif.push_back(temp);
 			bifN++;
 		}
-		else if (minutiaes[i].type == 3) {
-			Point temp = { minutiaes[i].x, minutiaes[i].y };
-			core.push_back(temp);
-			coreN++;
-		}
-		else if (minutiaes[i].type == 4) {
-			Point temp = { minutiaes[i].x, minutiaes[i].y };
-			delta.push_back(temp);
-			deltaN++;
-		}
 	}
 
 	cout << "ending : " << endingN << " bif : " << bifN << " core : " << coreN << " delta : " << deltaN << endl;

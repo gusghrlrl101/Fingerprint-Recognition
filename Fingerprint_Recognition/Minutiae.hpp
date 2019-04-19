@@ -17,7 +17,6 @@ struct Minutiae {
 	int type; //ending:1  bifurcation:2
 };
 
-
 vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 	CV_Assert(img.channels() == 1);
 	CV_Assert(img.depth() != sizeof(uchar));
@@ -138,23 +137,19 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 
 
 float angle(vector<pair<float, float>>& vec, int& u, int& v, int& block_size, Size size) {
-	cout << "angle: " << u << ", " << v << endl;
 	float fi = 0.0;
 
-	int width = size.width / block_size;
-	int height = size.height / block_size;
+	int val = size.width / block_size;
+	int width = u / block_size;
+	int height = v / block_size;
 
-	cout << width << ", " << height << endl;
-
-
+	fi = -atan2f(vec[height*val + width].second, vec[height*val + width].first) * 180 / CV_PI;
 
 	return fi;
 }
 
 
-
-
-Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float,float>>& vec, int& block_size, Size size) {
+Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& block_size, Size size) {
 	Mat temp;
 	Mat dst = src.clone();
 	dst /= 255;         // convert to binary image
@@ -162,6 +157,10 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float,float>>& vec, int& block
 	cv::Mat prev = cv::Mat::zeros(dst.size(), CV_8UC1);
 
 	vector<Minutiae> mVector = findMinutiae(dst, srcc);
+
+	for (int i =0;i<mVector.size();i++)
+		mVector[i].angle = angle(vec, mVector[i].x, mVector[i].y, block_size, size);
+
 	dst *= 255;
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
 	threshold(dst, dst, 127, 255, THRESH_BINARY_INV);
@@ -175,7 +174,7 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float,float>>& vec, int& block
 		else if (mVector[i].type == 2)
 			rectangle(dst, Point(mVector[i].x - 4, mVector[i].y - 4), Point(mVector[i].x + 4, mVector[i].y + 4), bif, 1);
 
-		cout << mVector[i].x << ", " << mVector[i].y << ": " << angle(vec, mVector[i].x, mVector[i].y, block_size, size) << endl;
+		cout << mVector[i].angle << endl;
 		imshow("drawing", dst);
 		waitKey(0);
 	}
