@@ -169,10 +169,18 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 	Scalar bif = Scalar(000, 255, 255);
 
 	for (int i = 0; i < mVector.size(); i++) {
-		if (mVector[i].type == 1)
+		if (mVector[i].type == 1) {
 			circle(dst, Point(mVector[i].x, mVector[i].y), 5, end, 1, 8);
-		else if (mVector[i].type == 2)
+			line(dst, { mVector[i].x, mVector[i].y },
+				{ mVector[i].x + (int)(8 * cos(mVector[i].angle)), mVector[i].y + int(8 * sin(mVector[i].angle)) }
+			, end);
+		}
+		else if (mVector[i].type == 2) {
 			rectangle(dst, Point(mVector[i].x - 4, mVector[i].y - 4), Point(mVector[i].x + 4, mVector[i].y + 4), bif, 1);
+			line(dst, { mVector[i].x, mVector[i].y },
+				{ mVector[i].x + (int)(8 * cos(mVector[i].angle)), mVector[i].y + int(8 * sin(mVector[i].angle)) }
+			, bif);
+		}
 
 		cout << mVector[i].angle << endl;
 		imshow("drawing", dst);
