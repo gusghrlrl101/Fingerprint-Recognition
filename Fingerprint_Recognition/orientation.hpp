@@ -123,14 +123,12 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 				int ln = sqrt(2 * pow(blockSize, 2)) / 2;
 				float dx = ln * cos(smoothed.at<float>(m, n) - CV_PI / 2);
 				float dy = ln * sin(smoothed.at<float>(m, n) - CV_PI / 2);
-				//				cout << m << ", " << n << ": " << dx << ", " << dy << endl;
 				vec.push_back({ dx,dy });
 
 				float my = dy / (dx + FLT_EPSILON);
 
 				int xx = (blockH / 2) / sqrt(pow(my, 2) + 1);
 				int yy = my * xx;
-//				cout << xx << ", " << yy << endl;
 
 				int mid_x = n + blockH / 2;
 				int mid_y = m + blockH / 2;
@@ -143,14 +141,14 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 		}
 	}///for2
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
-	// imshow("Orientation field", orientationMap);
+	 imshow("Orientation field", orientationMap);
 
 	orientationMap = smoothed.clone();
 
 	normalize(smoothed, smoothed, 0, 1, NORM_MINMAX);
 
-	// imshow("Smoothed orientation field", smoothed);
-	// imshow("Coherence", coherence);
+	 imshow("Smoothed orientation field", smoothed);
+	 imshow("Coherence", coherence);
 	// imshow("Orientation", fprintWithDirectionsSmoo);
 	pair<Mat, vector<pair<float, float>>> returning = { fprintWithDirectionsSmoo, vec };
 	return returning;

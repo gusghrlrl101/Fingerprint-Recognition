@@ -18,7 +18,7 @@ int main() {
 	// orientation block size
 	int block_size = 7;
 
-	Mat src = imread("image/Team1/2019_1_1_L_R_1.bmp");
+	Mat src = imread("image/etc/2.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
@@ -32,6 +32,7 @@ int main() {
 
 	Mat segmented;
 	Mat segmented2 = segmentation(src, segmented);
+	equalizeHist(src, src);
 
 	imshow("segmented", segmented);
 	imshow("segmented2", segmented2);

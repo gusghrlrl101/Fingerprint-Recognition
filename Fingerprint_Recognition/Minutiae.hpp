@@ -176,8 +176,8 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
 	threshold(dst, dst, 127, 255, THRESH_BINARY_INV);
 
-	Scalar end = Scalar(255, 255, 000);
-	Scalar bif = Scalar(000, 255, 255);
+	Scalar end = Scalar(255, 120, 000);
+	Scalar bif = Scalar(000, 200, 200);
 
 	for (int i = 0; i < mVector.size(); i++) {
 		if (mVector[i].type == 1) {
