@@ -85,47 +85,47 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 			int thr = 5;
 			if (*e == 1 && (sum == 1)) {
 				uchar* segVal = &(area.ptr<uchar>(y))[x];
-				//				if (*segVal == 0) {
-				bool isAlready = false;
-				for (auto mnt : mVector) {
-					int distt = abs(mnt.x - x) + abs(mnt.y - y);
-					if (distt <= thr) {
-						isAlready = true;
-						break;
+				if (*segVal == 0) {
+					bool isAlready = false;
+					for (auto mnt : mVector) {
+						int distt = abs(mnt.x - x) + abs(mnt.y - y);
+						if (distt <= thr) {
+							isAlready = true;
+							break;
+						}
 					}
-				}
 
-				if (!isAlready) {
-					if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
-						ending++;
-						minutiae.x = x; minutiae.y = y;
-						minutiae.type = 1;
-						mVector.push_back(minutiae);
+					if (!isAlready) {
+						if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
+							ending++;
+							minutiae.x = x; minutiae.y = y;
+							minutiae.type = 1;
+							mVector.push_back(minutiae);
+						}
 					}
 				}
-				//				}
 			}
 			if (*e == 1 && (xor_ == 6 || (xor_ == 6 && and_ == 2))) {
 				uchar* segVal = &(area.ptr<uchar>(y))[x];
-				//				if (*segVal == 0) {
-				bool isAlready = false;
-				for (auto mnt : mVector) {
-					int distt = abs(mnt.x - x) + abs(mnt.y - y);
-					if (distt <= thr) {
-						isAlready = true;
-						break;
+				if (*segVal == 0) {
+					bool isAlready = false;
+					for (auto mnt : mVector) {
+						int distt = abs(mnt.x - x) + abs(mnt.y - y);
+						if (distt <= thr) {
+							isAlready = true;
+							break;
+						}
 					}
-				}
 
-				if (!isAlready) {
-					if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
-						bifurcation++;
-						minutiae.x = x; minutiae.y = y;
-						minutiae.type = 2;
-						mVector.push_back(minutiae);
+					if (!isAlready) {
+						if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
+							bifurcation++;
+							minutiae.x = x; minutiae.y = y;
+							minutiae.type = 2;
+							mVector.push_back(minutiae);
+						}
 					}
 				}
-				//				}
 			}
 
 		}
@@ -136,7 +136,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 }
 
 
-float angle(vector<pair<float, float>>& vec, int& u, int& v, int& block_size, Size size) {
+float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& block_size, Size size, int& type) {
 	float fi = 0.0;
 
 	int val = size.width / block_size;
@@ -144,6 +144,17 @@ float angle(vector<pair<float, float>>& vec, int& u, int& v, int& block_size, Si
 	int height = v / block_size;
 
 	fi = -atan2f(vec[height*val + width].second, vec[height*val + width].first) * 180 / CV_PI;
+
+	if (type == 1) {
+		if (fi > 0) {
+			if (dst.at<uchar>({ u - 1, v }) == 1 || dst.at<uchar>({ u - 1, v + 1 }) == 1 || dst.at<uchar>({ u, v + 1 }) == 1)
+				fi -= 180;
+		}
+		else if (fi < 0) {
+			if (dst.at<uchar>({ u - 1, v }) == 1 || dst.at<uchar>({ u - 1, v - 1 }) == 1 || dst.at<uchar>({ u, v - 1 }) == 1)
+				fi += 180;
+		}
+	}
 
 	return fi;
 }
@@ -158,8 +169,8 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 
 	vector<Minutiae> mVector = findMinutiae(dst, srcc);
 
-	for (int i =0;i<mVector.size();i++)
-		mVector[i].angle = angle(vec, mVector[i].x, mVector[i].y, block_size, size);
+	for (int i = 0; i < mVector.size(); i++)
+		mVector[i].angle = angle(dst, vec, mVector[i].x, mVector[i].y, block_size, size, mVector[i].type);
 
 	dst *= 255;
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
@@ -172,18 +183,20 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 		if (mVector[i].type == 1) {
 			circle(dst, Point(mVector[i].x, mVector[i].y), 5, end, 1, 8);
 			line(dst, { mVector[i].x, mVector[i].y },
-				{ mVector[i].x + (int)(8 * cos(mVector[i].angle)), mVector[i].y + int(8 * sin(mVector[i].angle)) }
+				{ mVector[i].x + (int)(10.0f * cos(-mVector[i].angle * CV_PI / 180.0f)), mVector[i].y + int(10.0f * sin(-mVector[i].angle * CV_PI / 180.0f)) }
 			, end);
 		}
 		else if (mVector[i].type == 2) {
 			rectangle(dst, Point(mVector[i].x - 4, mVector[i].y - 4), Point(mVector[i].x + 4, mVector[i].y + 4), bif, 1);
 			line(dst, { mVector[i].x, mVector[i].y },
-				{ mVector[i].x + (int)(8 * cos(mVector[i].angle)), mVector[i].y + int(8 * sin(mVector[i].angle)) }
+				{ mVector[i].x + (int)(10.0f * cos(-mVector[i].angle * CV_PI / 180.0f)), mVector[i].y + int(10.0f * sin(-mVector[i].angle* CV_PI / 180.0f)) }
 			, bif);
 		}
 
 		cout << mVector[i].angle << endl;
-		imshow("drawing", dst);
+		Mat temp_dst_up;
+		pyrUp(dst, temp_dst_up);
+		imshow("drawing", temp_dst_up);
 		waitKey(0);
 	}
 
