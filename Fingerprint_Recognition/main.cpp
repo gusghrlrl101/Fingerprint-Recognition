@@ -43,12 +43,14 @@ int main() {
 	vector<pair<float, float>> vec = returned.second;
 
 	Mat gabored = gabor(src, vec, block_size) + segmented2;
-	threshold(gabored, gabored, 1, 255, THRESH_BINARY_INV);
+
+	Mat gabored_end;
+	threshold(gabored, gabored_end, 1, 255, THRESH_BINARY_INV);
 
 
-	Mat imgt = thinning(gabored);
+	Mat imgt = thinning(gabored_end);
 
-	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size);
+	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size, src);
 //	calculate(imgt, src);
 
 	pyrUp(src, src);
