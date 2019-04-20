@@ -27,7 +27,7 @@ int main() {
 
 	Mat pyup_src;
 	pyrUp(src, pyup_src);
-	pyrUp(pyup_src, pyup_src);
+//	pyrUp(pyup_src, pyup_src);
 	imshow("pyup_src", pyup_src);
 
 	Mat segmented;
@@ -41,7 +41,9 @@ int main() {
 	Mat show = returned.first;
 	vector<pair<float, float>> vec = returned.second;
 
-	Mat gabored = gabor(src, vec, block_size);
+	Mat gabored = gabor(src, vec, block_size) + segmented2;
+	threshold(gabored, gabored, 1, 255, THRESH_BINARY_INV);
+
 
 	Mat imgt = thinning(gabored);
 
