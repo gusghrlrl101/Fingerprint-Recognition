@@ -16,7 +16,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 {
 	Mat inputImage = src;
 
-//	cvtColor(src, inputImage, COLOR_RGB2GRAY);
+	//	cvtColor(src, inputImage, COLOR_RGB2GRAY);
 	inputImage.convertTo(inputImage, CV_32F, 1.0 / 255, 0);
 
 	medianBlur(inputImage, inputImage, 3);
@@ -41,7 +41,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 	Sobel(inputImage, grad_y, inputImage.depth(), 0, 1, 3);
 	//CASE:2- USE SCHARR OPERATOR OPENCV SYNTAX (INPUT IMAGE, SCHARR_OUTPUT, OTHER PARAMETERS) --> APPLY BOTH X-DIRECTION & Y-DIRECTION  
 	//NOTE: WHEN YOU EXECUTE THE PROGRAM USE CASE:1 OR CASE:2 NOT BOTH AT THE SAME TIME
-	
+
 	//Vector vield
 	Mat Fx(inputImage.size(), inputImage.type()),
 		Fy(inputImage.size(), inputImage.type()),
@@ -89,7 +89,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 
 			Fx.at<float>(i, j) = cos(2 * fi);
 			Fy.at<float>(i, j) = sin(2 * fi);
-			
+
 
 			//fill blocks
 			for (int u = i; u < i + blockH; u++)
@@ -127,6 +127,18 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 
 				float my = dy / (dx + FLT_EPSILON);
 
+				// 4°³·Î quntazation
+				if (2.0f <= my)
+					my = FLT_MAX;
+				else if (0.5f <= my && my < 2.0f)
+					my = 1.0f;
+				else if (-0.5f <= my && my < 0.5f)
+					my = 0.0f;
+				else if (-2.0f <= my && my < -0.5f)
+					my = -1.0f;
+				else if (my < -2.0f)
+					my = FLT_MAX;
+
 				int xx = (blockH / 2) / sqrt(pow(my, 2) + 1);
 				int yy = my * xx;
 
@@ -134,21 +146,21 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 				int mid_y = m + blockH / 2;
 				if (xx == 0 && yy == 0)
 					yy = blockH / 2;
-				
 
-				line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0 /*, 0.06*blockSize*/);
+
+				line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
 			}
 		}
 	}///for2
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
-	 imshow("Orientation field", orientationMap);
+	imshow("Orientation field", orientationMap);
 
 	orientationMap = smoothed.clone();
 
 	normalize(smoothed, smoothed, 0, 1, NORM_MINMAX);
 
-	 imshow("Smoothed orientation field", smoothed);
-	 imshow("Coherence", coherence);
+	imshow("Smoothed orientation field", smoothed);
+	imshow("Coherence", coherence);
 	// imshow("Orientation", fprintWithDirectionsSmoo);
 	pair<Mat, vector<pair<float, float>>> returning = { fprintWithDirectionsSmoo, vec };
 	return returning;
