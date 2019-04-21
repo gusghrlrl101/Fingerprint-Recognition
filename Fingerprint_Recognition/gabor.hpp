@@ -22,10 +22,8 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 	int width = src.cols;
 	int index = 0;
 
-	for (int m = 0; m < height; m++)
-	{
-		for (int n = 0; n < width; n++)
-		{
+	for (int m = 0; m < height; m++){
+		for (int n = 0; n < width; n++){
 			if ((m % block_size) == 0 && (n % block_size) == 0) {
 				float dx = vec[index].first;
 				float dy = vec[index].second;

@@ -58,77 +58,83 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 	pCurr = img.ptr<uchar>(0);
 	pBelow = img.ptr<uchar>(1);
 
-	for (y = 1; y < img.rows - 1; ++y) {
-		// shift the rows up by one
-		pAbove = pCurr;
-		pCurr = pBelow;
-		pBelow = img.ptr<uchar>(y + 1);
+	for (int thr = 5; thr < 30; thr++) {
+		mVector.clear();
+		ending = 0;
+		bifurcation = 0;
 
-		pDst = marker.ptr<uchar>(y);
+		for (y = 1; y < img.rows - 1; ++y) {
+			// shift the rows up by one
+			pAbove = pCurr;
+			pCurr = pBelow;
+			pBelow = img.ptr<uchar>(y + 1);
 
-		// initialize col pointers
-		b = &(pAbove[0]);
-		c = &(pAbove[1]);
-		e = &(pCurr[0]);
-		f = &(pCurr[1]);
-		h = &(pBelow[0]);
-		i = &(pBelow[1]);
+			pDst = marker.ptr<uchar>(y);
 
-		for (x = 1; x < img.cols - 1; ++x) {
-			a = b;   b = c;   c = &(pAbove[x + 1]);
-			d = e;   e = f;   f = &(pCurr[x + 1]);
-			g = h;   h = i;   i = &(pBelow[x + 1]);
+			// initialize col pointers
+			b = &(pAbove[0]);
+			c = &(pAbove[1]);
+			e = &(pCurr[0]);
+			f = &(pCurr[1]);
+			h = &(pBelow[0]);
+			i = &(pBelow[1]);
 
-			int sum = *a + *b + *c + *d + *f + *g + *h + *i;
-			int xor_ = (*a ^ *b) + (*b ^ *c) + (*c ^ *f) + (*f ^ *i) + (*d ^ *g) + (*g ^ *h) + (*h ^ *i) + (*d ^ *a);
+			for (x = 1; x < img.cols - 1; ++x) {
+				a = b;   b = c;   c = &(pAbove[x + 1]);
+				d = e;   e = f;   f = &(pCurr[x + 1]);
+				g = h;   h = i;   i = &(pBelow[x + 1]);
 
-			int thr = THR;
-			if (*e == 1 && (sum == 1)) {
-				uchar* segVal = &(area.ptr<uchar>(y))[x];
-				if (*segVal == 0) {
-					bool isAlready = false;
-					for (auto mnt : mVector) {
-						int distt = abs(mnt.x - x) + abs(mnt.y - y);
-						if (distt <= thr) {
-							isAlready = true;
-							break;
+				int sum = *a + *b + *c + *d + *f + *g + *h + *i;
+				int xor_ = (*a ^ *b) + (*b ^ *c) + (*c ^ *f) + (*f ^ *i) + (*d ^ *g) + (*g ^ *h) + (*h ^ *i) + (*d ^ *a);
+
+				if (*e == 1 && (sum == 1)) {
+					uchar* segVal = &(area.ptr<uchar>(y))[x];
+					if (*segVal == 0) {
+						bool isAlready = false;
+						for (auto mnt : mVector) {
+							int distt = sqrt(pow(mnt.x - x, 2) + pow(mnt.y - y, 2));
+							if (distt <= thr) {
+								isAlready = true;
+								break;
+							}
+						}
+
+						if (!isAlready) {
+							ending++;
+							minutiae.x = x; minutiae.y = y;
+							minutiae.type = 1;
+							mVector.push_back(minutiae);
 						}
 					}
-
-					if (!isAlready) {
-						//               if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
-						ending++;
-						minutiae.x = x; minutiae.y = y;
-						minutiae.type = 1;
-						mVector.push_back(minutiae);
-						//               }
-					}
 				}
-			}
 
-			if (*e == 1 && xor_ == 6 ) {
-				uchar* segVal = &(area.ptr<uchar>(y))[x];
-				if (*segVal == 0) {
-					bool isAlready = false;
-					for (auto mnt : mVector) {
-						int distt = abs(mnt.x - x) + abs(mnt.y - y);
-						if (distt <= thr) {
-							isAlready = true;
-							break;
+				if (*e == 1 && xor_ == 6) {
+					uchar* segVal = &(area.ptr<uchar>(y))[x];
+					if (*segVal == 0) {
+						bool isAlready = false;
+						for (auto mnt : mVector) {
+							int distt = sqrt(pow(mnt.x - x, 2) + pow(mnt.y - y, 2));
+							if (distt <= thr) {
+								isAlready = true;
+								break;
+							}
+						}
+
+						if (!isAlready) {
+							bifurcation++;
+							minutiae.x = x; minutiae.y = y;
+							minutiae.type = 2;
+							mVector.push_back(minutiae);
 						}
 					}
-
-					if (!isAlready) {
-						//               if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
-						bifurcation++;
-						minutiae.x = x; minutiae.y = y;
-						minutiae.type = 2;
-						mVector.push_back(minutiae);
-						//               }
-					}
 				}
-			}
 
+			}
+		}
+
+		if (ending <= 30 && bifurcation <= 30) {
+			cout << "thr: " << thr << endl;
+			break;
 		}
 	}
 	cout << "ending: " << ending << ", bifurcation: " << bifurcation << endl;

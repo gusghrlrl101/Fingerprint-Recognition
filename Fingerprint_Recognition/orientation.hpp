@@ -178,7 +178,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 				if (!coredelta)
 					line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
 				else {
-					line(coredeltaPrint, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
+//					line(coredeltaPrint, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
 				}
 			}
 		}
@@ -300,6 +300,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 
 	if (!pq_core.empty() && pq_core.top().first > 2) {
 		circle(coredeltaPrint, Point(pq_core.top().second.second + blockSize / 2, pq_core.top().second.first + blockSize / 2), 5, Scalar(0, 0, 255), 1, 16);
+		cout << "core" << endl;
 	}
 
 	if (!pq_delta.empty() && pq_delta.top().first > 2) {
@@ -309,6 +310,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 		line(coredeltaPrint, Point(nnn + blockSize / 2, mmm), Point(nnn + blockSize / 2, mmm + blockSize), Scalar(0, 0, 255), 1, LINE_AA, 0);
 		line(coredeltaPrint, Point(nnn, mmm + blockSize / 2), Point(nnn + blockSize, mmm + blockSize / 2), Scalar(0, 0, 255), 1, LINE_AA, 0);
 		pq_delta.pop();
+		cout << "delta" << endl;
 	}
 
 	if (!pq_delta.empty() && pq_delta.top().first > 2) {
@@ -317,6 +319,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 
 		line(coredeltaPrint, Point(nnn + blockSize / 2, mmm), Point(nnn + blockSize / 2, mmm + blockSize), Scalar(0, 0, 255), 1, LINE_AA, 0);
 		line(coredeltaPrint, Point(nnn, mmm + blockSize / 2), Point(nnn + blockSize, mmm + blockSize / 2), Scalar(0, 0, 255), 1, LINE_AA, 0);
+		cout << "delta" << endl;
 	}
 
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
