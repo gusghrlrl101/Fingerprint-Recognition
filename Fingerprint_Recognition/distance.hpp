@@ -32,7 +32,7 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 	bool chk = false; // 홀짝 계산용 flag
 	Point temp;
 	if (distanceX >= distanceY) { // X간의 거리가 더 넓은지, Y 간의 거리가 더 넓은지에 따라 분기
-		double rate = (double)(distanceX / distanceY); // 기울기
+		double rate = (double)(distanceX / (distanceY + DBL_EPSILON)); // 기울기
 		while (line1[line1.size() - 1].x != pt2.x && line1[line1.size() - 1].y != pt2.y) {
 			//번갈아가면서 더해줘야 맞는 직선이 나옴
 			if (pt1.y <= pt2.y) {
@@ -63,7 +63,7 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 		}
 	}
 	else {
-		double rate = (double)(distanceY / distanceX); // 기울기
+		double rate = (double)(distanceY / (distanceX + DBL_EPSILON)); // 기울기
 		while (line1[line1.size() - 1].x != pt2.x&&line1[line1.size() - 1].y != pt2.y) {
 			//번갈아가면서 더해줘야 맞는 직선이 나옴
 			if (pt1.y <= pt2.y) {
@@ -101,10 +101,12 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 	}
 	if (count < 4)
 		return 0;
-	cout << "융선 수 :  " << count << endl;
-	cout << "총 거리 : " << distance << endl;
+
 	indiDistance = distance / (double)count;
-	cout << "융선 간 거리 :  " << indiDistance << endl;
+
+//	cout << "융선 수 :  " << count << endl;
+//	cout << "총 거리 : " << distance << endl;
+//	cout << "융선 간 거리 :  " << indiDistance << endl;
 
 	return indiDistance;
 }
@@ -117,10 +119,7 @@ void calculate(Mat imgt, Mat src) {
 
 	vector<Point> ending;
 	vector<Point> bif;
-	vector<Point> core;
-	vector<Point> delta;
 	int endingN = 0, bifN = 0, coreN = 0, deltaN = 0;
-	cout << minutiaes.size() << endl;
 
 	for (int i = 0; i < minutiaes.size(); i++) {
 		if (minutiaes[i].type == 1) {
@@ -133,33 +132,26 @@ void calculate(Mat imgt, Mat src) {
 			bif.push_back(temp);
 			bifN++;
 		}
-		else if (minutiaes[i].type == 3) {
-			Point temp = { minutiaes[i].x, minutiaes[i].y };
-			core.push_back(temp);
-			coreN++;
-		}
-		else if (minutiaes[i].type == 4) {
-			Point temp = { minutiaes[i].x, minutiaes[i].y };
-			delta.push_back(temp);
-			deltaN++;
-		}
 	}
 
-	//cout << "ending : " << endingN << " bif : " << bifN << " core : " << coreN << " delta : " << deltaN << endl;
 	int count = 1;
 	int distanceMean = 0, distanceMax = 0, distanceMin = 987654321;
 	int distanceN = 0;
 	for (int i = 0; i < ending.size(); i++) {
 		for (int j = 0; j < bif.size(); j++) {
-			cout << "#" << count << "번째" << endl;
 			Point temp1 = { ending[i].x, ending[i].y };
 			Point temp2 = { bif[j].x, bif[j].y };
 			if (temp1.x <= temp2.x)
 				distanceN = distance(imgt, temp1, temp2);
 			else
 				distanceN = distance(imgt, temp2, temp1);
+
 			if (distanceN > 0)
 				count++;
+			else
+				continue;
+
+//			cout << "#" << count << "번째" << endl;
 			if (distanceN > distanceMax)
 				distanceMax = distanceN;
 			if (distanceN < distanceMin && distanceN > 0)

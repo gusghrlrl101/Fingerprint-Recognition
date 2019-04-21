@@ -79,6 +79,7 @@ int main() {
 	pyrUp(result, result);
 	imshow("check", result);
 	
+	cout << "³¡!" << endl;
 	waitKey(0);
 	return 0;
 }
