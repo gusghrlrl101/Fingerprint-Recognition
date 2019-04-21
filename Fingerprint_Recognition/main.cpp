@@ -18,7 +18,7 @@ int main() {
 	// orientation block size
 	int block_size = 7;
 
-	Mat src = imread("image/Team1/2019_1_1_L_R_1.bmp");
+	Mat src = imread("image/etc/23.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
@@ -27,11 +27,12 @@ int main() {
 
 	Mat pyup_src;
 	pyrUp(src, pyup_src);
-	pyrUp(pyup_src, pyup_src);
+//	pyrUp(pyup_src, pyup_src);
 	imshow("pyup_src", pyup_src);
 
 	Mat segmented;
 	Mat segmented2 = segmentation(src, segmented);
+	equalizeHist(src, src);
 
 	imshow("segmented", segmented);
 	imshow("segmented2", segmented2);
@@ -41,11 +42,15 @@ int main() {
 	Mat show = returned.first;
 	vector<pair<float, float>> vec = returned.second;
 
-	Mat gabored = gabor(src, vec, block_size);
+	Mat gabored = gabor(src, vec, block_size) + segmented2;
 
-	Mat imgt = thinning(gabored);
+	Mat gabored_end;
+	threshold(gabored, gabored_end, 1, 255, THRESH_BINARY_INV);
 
-	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size);
+
+	Mat imgt = thinning(gabored_end);
+
+	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size, src);
 //	calculate(imgt, src);
 
 	pyrUp(src, src);

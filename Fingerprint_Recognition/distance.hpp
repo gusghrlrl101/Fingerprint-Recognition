@@ -11,7 +11,7 @@ using namespace cv;
 using namespace std;
 
 //TODO : Real World로의 거리 표현 필요
-//TODO : Pt1과 Pt2의 위치에 따라서 분기 필요
+//TODO : Pt1과 Pt2의 위치에 따라서 분기 필요 -> X좌표에 대해서만 되어 있는데 Y 좌표에 대해서도 필요
 
 int distance(Mat& src, Point& pt1, Point& pt2) {
 	//cv::cvtColor(src, src, COLOR_BGR2GRAY); // Gray Version
@@ -33,17 +33,28 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 	Point temp;
 	if (distanceX >= distanceY) { // X간의 거리가 더 넓은지, Y 간의 거리가 더 넓은지에 따라 분기
 		double rate = (double)(distanceX / distanceY); // 기울기
-		while (line1[line1.size() - 1].x != pt2.x&&line1[line1.size() - 1].y != pt2.y) {
+		while (line1[line1.size() - 1].x != pt2.x || line1[line1.size() - 1].y != pt2.y) {
 			//번갈아가면서 더해줘야 맞는 직선이 나옴
-			if (chk) {
-				temp = { (int)(line1[line1.size() - 1].x + rate + 1), line1[line1.size() - 1].y + 1 };
-				chk = false;
+			if (pt1.y <= pt2.y) {
+				if (chk) {
+					temp = { (int)(line1[line1.size() - 1].x + rate + 1), line1[line1.size() - 1].y + 1 };
+					chk = false;
+				}
+				else {
+					temp = { (int)(line1[line1.size() - 1].x + rate), line1[line1.size() - 1].y + 1 };
+					chk = true;
+				}
 			}
 			else {
-				temp = { (int)(line1[line1.size() - 1].x + rate), line1[line1.size() - 1].y + 1 };
-				chk = true;
+				if (chk) {
+					temp = { (int)(line1[line1.size() - 1].x + rate + 1), line1[line1.size() - 1].y - 1 };
+					chk = false;
+				}
+				else {
+					temp = { (int)(line1[line1.size() - 1].x + rate), line1[line1.size() - 1].y - 1 };
+					chk = true;
+				}
 			}
-
 			line1.push_back(temp);
 		}
 	}
@@ -51,13 +62,25 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 		double rate = (double)(distanceY / distanceX); // 기울기
 		while (line1[line1.size() - 1].x != pt2.x&&line1[line1.size() - 1].y != pt2.y) {
 			//번갈아가면서 더해줘야 맞는 직선이 나옴
-			if (chk) {
-				temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y + rate + 1) };
-				chk = false;
+			if (pt1.y <= pt2.y) {
+				if (chk) {
+					temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y + rate + 1) };
+					chk = false;
+				}
+				else {
+					temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y + rate) };
+					chk = true;
+				}
 			}
 			else {
-				temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y + rate) };
-				chk = true;
+				if (chk) {
+					temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y - rate - 1) };
+					chk = false;
+				}
+				else {
+					temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y - rate) };
+					chk = true;
+				}
 			}
 			line1.push_back(temp);
 		}
@@ -117,10 +140,10 @@ void calculate(Mat imgt, Mat src) {
 	int distanceMean = 0, distanceMax = 0, distanceMin = 987654321;
 	int distanceN = 0;
 	for (int i = 0; i < ending.size(); i++) {
-		for (int j = 0; j < core.size(); j++) {
+		for (int j = 0; j < bif.size(); j++) {
 			cout << "#" << count << "번째" << endl;
 			Point temp1 = { ending[i].x, ending[i].y };
-			Point temp2 = { core[j].x, core[j].y };
+			Point temp2 = { bif[j].x, bif[j].y };
 			if (temp1.x <= temp2.x)
 				distanceN = distance(imgt, temp1, temp2);
 			else
