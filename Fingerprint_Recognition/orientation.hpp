@@ -132,8 +132,8 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 				vec.push_back({ dx,dy });
 
 				float my = dy / (dx + FLT_EPSILON);
-				float mymy = my;
 
+				float mymy = my;
 				// 4°³·Î qusntazation
 				if (2.0f <= my)
 					mymy = FLT_MAX;
@@ -178,7 +178,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 				if (!coredelta)
 					line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
 				else {
-					//				line(coredeltaPrint, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
+					line(coredeltaPrint, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
 				}
 			}
 		}
@@ -260,24 +260,49 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 							int cnt_core = up_side + down_up;
 							int cnt_delta = up_up + down_side;
 
-							if (cnt_delta <= cnt_core) {
+							if (cnt_delta <= cnt_core)
 								pq_core.push({ cnt_core - cnt_delta, {m, n} });
-							}
-							else {
-								pq_delta.push({ cnt_delta - cnt_core, {m, n} });
-							}
+							else
+								pq_delta.push({ cnt_delta - cnt_core, {m, n} });							
 						}
 					}
 				}
 			}
 		}
 	}
+	else {
+		int my_index = 0;
+		for (int m = 0; m < height; m++) {
+			for (int n = 0; n < width; n++) {
+				if (m%blockSize == 0 && n%blockSize == 0) {
+					if (0 <= m - blockSize && m + blockSize < height) {
+						if (vec_mymy[m - blockSize][n] == FLT_MAX && vec_mymy[m + blockSize][n] == FLT_MAX) {
+							if (vec_mymy[m][n] == 1.0f || vec_mymy[m][n] == -1.0f || vec_mymy[m][n] == 0.0f) {
 
-	if (!pq_core.empty()) {
+								if (vec[my_index - width / blockSize].second * vec[my_index + width / blockSize].second < 0.0f) {
+									vec[my_index] = { 0.0f, FLT_MAX };
+								}
+								else {
+									vec[my_index] = {
+										(vec[my_index - width / blockSize].first + vec[my_index + width / blockSize].first) / 2 ,
+										(vec[my_index - width / blockSize].second + vec[my_index + width / blockSize].second) / 2
+									};
+								}
+							}
+						}
+					}
+
+					my_index++;
+				}
+			}
+		}
+	}
+
+	if (!pq_core.empty() && pq_core.top().first > 2) {
 		circle(coredeltaPrint, Point(pq_core.top().second.second + blockSize / 2, pq_core.top().second.first + blockSize / 2), 5, Scalar(0, 0, 255), 1, 16);
 	}
 
-	if (!pq_delta.empty()) {
+	if (!pq_delta.empty() && pq_delta.top().first > 2) {
 		int mmm = pq_delta.top().second.first;
 		int nnn = pq_delta.top().second.second;
 
@@ -286,7 +311,7 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 		pq_delta.pop();
 	}
 
-	if (!pq_delta.empty()) {
+	if (!pq_delta.empty() && pq_delta.top().first > 2) {
 		int mmm = pq_delta.top().second.first;
 		int nnn = pq_delta.top().second.second;
 

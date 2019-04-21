@@ -5,6 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <math.h>
 
+#define THR 10
 
 using namespace std;
 using namespace cv;
@@ -81,7 +82,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 			int sum = *a + *b + *c + *d + *f + *g + *h + *i;
 			int xor_ = (*a ^ *b) + (*b ^ *c) + (*c ^ *f) + (*f ^ *i) + (*d ^ *g) + (*g ^ *h) + (*h ^ *i) + (*d ^ *a);
 
-			int thr = 5;
+			int thr = THR;
 			if (*e == 1 && (sum == 1)) {
 				uchar* segVal = &(area.ptr<uchar>(y))[x];
 				if (*segVal == 0) {
