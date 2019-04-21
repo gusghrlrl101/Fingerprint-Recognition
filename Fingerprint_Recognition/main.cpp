@@ -18,7 +18,7 @@ int main() {
 	// orientation block size
 	int block_size = 7;
 
-	Mat src = imread("image/etc/23.bmp");
+	Mat src = imread("image/etc/9.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
@@ -41,6 +41,12 @@ int main() {
 	pair<Mat, vector<pair<float, float>>> returned = orientation(src, block_size);
 	Mat show = returned.first;
 	vector<pair<float, float>> vec = returned.second;
+
+	pair<Mat, vector<pair<float, float>>> returned2 = orientation(src, 7, true);
+	Mat coredelta = returned2.first;
+	pyrUp(coredelta, coredelta);
+	imshow("coredelta", coredelta);
+
 
 	Mat gabored = gabor(src, vec, block_size) + segmented2;
 

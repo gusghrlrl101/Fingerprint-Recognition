@@ -80,7 +80,6 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 
 			int sum = *a + *b + *c + *d + *f + *g + *h + *i;
 			int xor_ = (*a ^ *b) + (*b ^ *c) + (*c ^ *f) + (*f ^ *i) + (*d ^ *g) + (*g ^ *h) + (*h ^ *i) + (*d ^ *a);
-			int and_ = (*a & *b) + (*b & *c) + (*c & *f) + (*f & *i) + (*d & *g) + (*g & *h) + (*h & *i) + (*d & *a);
 
 			int thr = 5;
 			if (*e == 1 && (sum == 1)) {
@@ -96,17 +95,17 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 					}
 
 					if (!isAlready) {
-						//					if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
+						//               if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
 						ending++;
 						minutiae.x = x; minutiae.y = y;
 						minutiae.type = 1;
 						mVector.push_back(minutiae);
-						//					}
+						//               }
 					}
 				}
 			}
 
-			if (*e == 1 && (xor_ == 6 || (xor_ == 6 && and_ == 2))) {
+			if (*e == 1 && xor_ == 6 ) {
 				uchar* segVal = &(area.ptr<uchar>(y))[x];
 				if (*segVal == 0) {
 					bool isAlready = false;
@@ -119,12 +118,12 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 					}
 
 					if (!isAlready) {
-						//					if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
+						//               if (0 <= x - 3 && x + 3 < img.cols && 0 <= y - 3 && y + 3 < img.rows) {
 						bifurcation++;
 						minutiae.x = x; minutiae.y = y;
 						minutiae.type = 2;
 						mVector.push_back(minutiae);
-						//					}
+						//               }
 					}
 				}
 			}
@@ -143,42 +142,41 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 	int val = size.width / block_size;
 	int width = u / block_size;
 	int height = v / block_size;
-	cout << "angle: " << height << ", " << width << endl;
 
-	fi = - atan2f(vec[height * val + width].second, vec[height * val + width].first) * 180.0f / CV_PI;
+	fi = -atan2f(vec[height*val + width].second, vec[height*val + width].first) * 180 / CV_PI;
 
-	// endï¿½ï¿½ ï¿½ï¿½ï¿½
+	// endÀÎ °æ¿ì
 	if (type == 1) {
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+		// ÇöÀç °¢µµ°¡ ¿ì»óÇâÀÎ °æ¿ì
 		if (fi > 0) {
-			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ 180ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ï¿½
-			if (dst.at<uchar>(v, u - 1) == 1 || dst.at<uchar>(v + 1, u - 1 ) == 1 || dst.at<uchar>(v + 1, u) == 1)
+			// ÇöÀç Á¡ ±âÁØ ÁÂÇÏÇâ ¹æÇâ¿¡ ´ÙÀ½ Á¡ÀÌ ÀÖ´Â °æ¿ì 180µµ ¹Ù²ãÁÜ
+			if (dst.at<uchar>({ u - 1, v }) == 1 || dst.at<uchar>({ u - 1, v + 1 }) == 1 || dst.at<uchar>({ u, v + 1 }) == 1)
 				fi -= 180;
 		}
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+		// ÇöÀç °¢µµ°¡ ¿ìÇÏÇâÀÎ °æ¿ì
 		else if (fi < 0) {
-			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ 180ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ï¿½
-			if (dst.at<uchar>(v, u - 1) == 1 || dst.at<uchar>(v - 1, u - 1) == 1 || dst.at<uchar>(v - 1, u) == 1)
+			// ÇöÀç Á¡ ±âÁØ ¿ì »óÇâ ¹æÇâ¿¡ ´ÙÀ½ Á¡ÀÌ ÀÖ´Â °æ¿ì 180µµ ¹Ù²ãÁÜ
+			if (dst.at<uchar>({ u - 1, v }) == 1 || dst.at<uchar>({ u - 1, v - 1 }) == 1 || dst.at<uchar>({ u, v - 1 }) == 1)
 				fi += 180;
 		}
 	}
-	// bifarï¿½ï¿½ ï¿½ï¿½ï¿½
+	// bifarÀÎ °æ¿ì
 	else if (type == 2) {
-		// ï¿½Ì¹ï¿½ï¿½ï¿½ Å©ï¿½â¸¸Å­ ï¿½æ¹® ï¿½ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		// ÀÌ¹ÌÁö Å©±â¸¸Å­ ¹æ¹® ÀúÀå¿ë 2Â÷¿ø º¤ÅÍ »ý¼º
 		vector<vector<bool>> visit(size.width, vector<bool>(size.height, false));
 		visit[u][v] = true;
 		int dir = 0;
 
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		// ÇöÀç Á¡ ±âÁØ 3°³·Î ³ª´· °ÍÀÓ
 		pair<int, int> index[3] = { { -1,-1 }, {-1,-1}, {-1,-1} };
 
-		// t = 0 ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½, 3ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ ï¿½ë°¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
+		// t = 0 ÀÏ¶§ »óÇÏÁÂ¿ì ºÎÅÍ Ã£°í, 3°³ ´Ù ¸øÃ£À¸¸é ´ë°¢¼± ¹æÇâ Ã£À½
 		for (int t = 0; t < 2; t++) {
 			for (int i = -1; i <= +1; i++) {
 				for (int j = -1; j <= +1; j++) {
 					if (t == 1 || t == 0 && i*j == 0) {
 						if (0 <= u + i && u + i < size.width && 0 <= v + j && v + j < size.height &&
-							!visit[u + i][v + j] && dst.at<uchar>(v + j, u + i) == 1) {
+							!visit[u + i][v + j] && dst.at<uchar>({ u + i, v + j }) == 1) {
 							if (dir < 3) {
 								index[dir++] = { u + i, v + j };
 								visit[u + i][v + j] = true;
@@ -189,25 +187,25 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 			}
 		}
 
-		// ï¿½Ìµï¿½ï¿½ï¿½ È½ï¿½ï¿½
+		// ÀÌµ¿ÇÒ È½¼ö
 		int count = 10;
 		for (int tt = 0; tt < count; tt++) {
 			for (int dir = 0; dir < 3; dir++) {
 				bool isFinish = false;
-				// t = 0 ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Å½ï¿½ï¿½
+				// t = 0 ÀÏ¶§ »óÇÏÁÂ¿ì ºÎÅÍ Å½»ö
 				for (int t = 0; t < 2; t++) {
-					// 8ï¿½ï¿½ï¿½ï¿½ Å½ï¿½ï¿½
+					// 8¹æÇâ Å½»ö
 					for (int i = -1; i <= +1; i++) {
 						for (int j = -1; j <= +1; j++) {
 							if (t == 1 || t == 0 && i * j == 0) {
 								int next_i = index[dir].first + i;
 								int next_j = index[dir].second + j;
 
-								// ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+								// ´ÙÀ½ ÀÌµ¿ÇÒ ¹æÇâÀÌ ÀÖ°í Á¡ÀÌ ÀÖ´Â °æ¿ì ÀÌµ¿
 								if (0 <= next_i && next_i < size.width &&
 									0 <= next_j && next_j < size.height &&
 									!visit[next_i][next_j] &&
-									dst.at<uchar>(next_j, next_i) == 1) {
+									dst.at<uchar>({ next_i, next_j }) == 1) {
 									index[dir] = { next_i, next_j };
 									visit[next_i][next_j] = true;
 
@@ -225,12 +223,12 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 			}
 		}
 
-		// 3 ï¿½ï¿½ ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		// 3 °³ Áß 2°³¸¦ °ñ¶ó °¢µµ°¡ Á¦ÀÏ ÀÛÀº °ÍÀ» ÀúÀå
 		int min_theta = 361;
 		int min_one = -1, min_two = -1;
 		for (int i = 0; i < 3; i++) {
 			int one = -1, two = -1;
-			// 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			// 2°³¸¦ °í¸§
 			for (int j = 0; j < 3; j++) {
 				if (i == j)
 					continue;
@@ -239,22 +237,22 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 				else
 					two = j;
 			}
-			// 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+			// 2°³ÀÇ º¤ÅÍ¸¦ ±¸ÇÔ
 			int v1x = index[one].first - u;
 			int v1y = index[one].second - v;
 			int v2x = index[two].first - u;
 			int v2y = index[two].second - v;
 
-			// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			int inner = v1x * v2x + v1y * v2y;
-			// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å©ï¿½â¸¦ ï¿½ï¿½ï¿½ï¿½
+			// µÎ º¤ÅÍÀÇ ³»ÀûÀ» ±¸ÇÔ
+			float inner = v1x * v2x + v1y * v2y;
+			// µÎ º¤ÅÍÀÇ Å©±â¸¦ ±¸ÇÔ
 			float v1_size = sqrt(pow(v1x, 2) + pow(v1y, 2));
 			float v2_size = sqrt(pow(v2x, 2) + pow(v2y, 2));
 
-			// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			// µÎ º¤ÅÍÀÇ »çÀÌ °¢À» ±¸ÇÔ
 			int theta = acosf(inner / (v1_size*v2_size)) * 180.0f / CV_PI;
 
-			// ï¿½Ö¼Ò°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			// ÃÖ¼Ò°ªº¸´Ù ÀÛÀ¸¸é °»½Å
 			if (min_theta > theta) {
 				min_theta = theta;
 				min_one = one;
@@ -262,15 +260,15 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 			}
 		}
 
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		// °¡Àå ÀÛÀº °¢µµ¸¦ °¡Áø µÎº¤ÅÍÀÇ Áß°£ °ªÀ» ±¸ÇÔ
 		float mid_x = (index[min_one].first + index[min_two].first) / 2.0f;
 		float mid_y = (index[min_one].second + index[min_two].second) / 2.0f;
 
-		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+		// ÇöÀç Á¡¿¡¼­ Áß°£ °ªÀ¸·ÎÀÇ º¤ÅÍ¸¦ ±¸ÇÔ
 		float vx = mid_x - u;
 		float vy = mid_y - v;
 
-		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ xï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 180ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		// º¤ÅÍÀÇ x°ªÀÌ À½¼öÀÎ °æ¿ì, °¢µµ¸¦ 180µµ ¹Ù²ãÁà¾ßÇÔ
 		if (vx < 0) {
 			if (fi > 0)
 				fi -= 180;
@@ -318,11 +316,6 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 				{ mVector[i].x + (int)(10.0f * cos(-mVector[i].angle * CV_PI / 180.0f)), mVector[i].y + int(10.0f * sin(-mVector[i].angle* CV_PI / 180.0f)) }
 			, bif);
 		}
-
-//		Mat temp_dst_up;
-//		pyrUp(dst, temp_dst_up);
-//		imshow("drawing", temp_dst_up);
-//		waitKey(0);
 	}
 
 	return dst2;

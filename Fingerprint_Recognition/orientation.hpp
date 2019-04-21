@@ -5,6 +5,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <queue>
 
 using namespace std;
 using namespace cv;
@@ -12,7 +13,7 @@ using namespace cv;
 
 // gray 변환 후 CV_32F로 변환 필요
 
-pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
+pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool coredelta = false)
 {
 	Mat inputImage = src;
 
@@ -27,6 +28,9 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 	Mat orientationMap;
 
 	Mat fprintWithDirectionsSmoo = inputImage.clone();
+	Mat coredeltaPrint = inputImage.clone();
+	cvtColor(coredeltaPrint, coredeltaPrint, COLOR_GRAY2BGR);
+
 	Mat tmp(inputImage.size(), inputImage.type());
 	Mat coherence(inputImage.size(), inputImage.type());
 	orientationMap = tmp.clone();
@@ -112,6 +116,8 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 	GaussianBlur(Fx, Fx_gauss, Size(5, 5), 1, 1);
 	GaussianBlur(Fy, Fy_gauss, Size(5, 5), 1, 1);
 
+	vector<vector<float>> vec_mymy(height, vector<float>(width, 0.0f));
+
 	for (int m = 0; m < height; m++)
 	{
 		for (int n = 0; n < width; n++)
@@ -126,38 +132,174 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 				vec.push_back({ dx,dy });
 
 				float my = dy / (dx + FLT_EPSILON);
+				float mymy = my;
 
+				cout << "mymy: " << m << ", " << n << ": " << my << endl;
 				// 4개로 qusntazation
 				if (2.0f <= my)
-					my = FLT_MAX;
+					mymy = FLT_MAX;
 				else if (0.5f <= my && my < 2.0f)
-					my = 1.0f;
+					mymy = 1.0f;
 				else if (-0.5f <= my && my < 0.5f)
-					my = 0.0f;
+					mymy = 0.0f;
 				else if (-2.0f <= my && my < -0.5f)
-					my = -1.0f;
+					mymy = -1.0f;
 				else if (my < -2.0f)
-					my = FLT_MAX;
+					mymy = FLT_MAX;
 
-				int my_m = m / blockSize;
-				int my_n = n / blockSize;
-				if (0 <= my_m - 1 && my_m + 1 < height / blockSize &&
-					0 <= my_n - 1 && my_n + 1 < width / blockSize) {
-					
-				}
+				vec_mymy[m][n] = mymy;
 
 				int xx = (blockH / 2) / sqrt(pow(my, 2) + 1);
 				int yy = my * xx;
+
+				if (coredelta) {
+					if (mymy == 1.0f) {
+						xx = blockSize / 2 - 1;
+						yy = blockSize / 2 - 1;
+					}
+					else if (mymy == -1.0f) {
+						xx = blockSize / 2 - 1;
+						yy = -(blockSize / 2 - 1);
+					}
+					else if (mymy == 0.0f) {
+						xx = blockSize / 2 - 1;
+						yy = 0;
+					}
+					else if (mymy == FLT_MAX) {
+						xx = 0;
+						yy = blockSize / 2 - 1;
+					}
+				}
 
 				int mid_x = n + blockH / 2;
 				int mid_y = m + blockH / 2;
 				if (xx == 0 && yy == 0)
 					yy = blockH / 2;
 
-				line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
+				if (!coredelta)
+					line(fprintWithDirectionsSmoo, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
+				else {
+					//				line(coredeltaPrint, Point(mid_x + xx, mid_y + yy), Point(mid_x - xx, mid_y - yy), Scalar::all(255), 1, LINE_AA, 0);
+				}
 			}
 		}
 	}///for2
+
+	priority_queue<pair<int, pair<int, int>>> pq_core;
+	priority_queue<pair<int, pair<int, int>>> pq_delta;
+
+	if (coredelta) {
+		for (int m = 0; m < height; m++) {
+			for (int n = 0; n < width; n++) {
+				if (m%blockSize == 0 && n%blockSize == 0) {
+					if (0 <= m - blockSize && m + blockSize < height &&
+						0 <= n - blockSize && n + blockSize < width) {
+						// + = -
+						if (vec_mymy[m][n - blockSize] == -1.0f && vec_mymy[m][n] == 0.0f && vec_mymy[m][n + blockSize] == 1.0f) {
+							int up_up = 0;
+							int up_side = 0;
+							int down_up = 0;
+							int down_side = 0;
+
+							// 위에 3개
+							if (vec_mymy[m - blockSize][n - blockSize] == FLT_MAX)
+								up_up += 2;
+							else if (vec_mymy[m - blockSize][n - blockSize] == 1.0f || vec_mymy[m - blockSize][n - blockSize] == -1.0f) {
+								up_up++;
+								up_side++;
+							}
+							else if (vec_mymy[m - blockSize][n - blockSize] == 0.0f)
+								up_side += 2;
+
+							if (vec_mymy[m - blockSize][n] == FLT_MAX)
+								up_up += 2;
+							else if (vec_mymy[m - blockSize][n] == 1.0f || vec_mymy[m - blockSize][n] == -1.0f) {
+								up_up++;
+								up_side++;
+							}
+							else if (vec_mymy[m - blockSize][n] == 0.0f)
+								up_side += 2;
+
+							if (vec_mymy[m - blockSize][n + blockSize] == FLT_MAX)
+								up_up += 2;
+							else if (vec_mymy[m - blockSize][n + blockSize] == 1.0f || vec_mymy[m - blockSize][n + blockSize] == -1.0f) {
+								up_up++;
+								up_side++;
+							}
+							else if (vec_mymy[m - blockSize][n + blockSize] == 0.0f)
+								up_side += 2;
+
+
+							// 아래 3개
+							if (vec_mymy[m + blockSize][n - blockSize] == FLT_MAX)
+								down_up += 2;
+							else if (vec_mymy[m + blockSize][n - blockSize] == 1.0f || vec_mymy[m + blockSize][n - blockSize] == -1.0f) {
+								down_up++;
+								down_side++;
+							}
+							else if (vec_mymy[m + blockSize][n - blockSize] == 0.0f)
+								down_side += 2;
+
+							if (vec_mymy[m + blockSize][n] == FLT_MAX)
+								down_up += 2;
+							else if (vec_mymy[m + blockSize][n] == 1.0f || vec_mymy[m + blockSize][n] == -1.0f) {
+								down_up++;
+								down_side++;
+							}
+							else if (vec_mymy[m + blockSize][n] == 0.0f)
+								down_side += 2;
+
+							if (vec_mymy[m + blockSize][n + blockSize] == FLT_MAX)
+								down_up += 2;
+							else if (vec_mymy[m + blockSize][n + blockSize] == 1.0f || vec_mymy[m + blockSize][n + blockSize] == -1.0f) {
+								down_up++;
+								down_side++;
+							}
+							else if (vec_mymy[m + blockSize][n + blockSize] == 0.0f)
+								down_side += 2;
+
+
+							cout << "value: ";
+							cout << up_up + down_side << ", ";
+							cout << up_side + down_up << endl;
+
+							int cnt_core = up_side + down_up;
+							int cnt_delta = up_up + down_side;
+
+							if (cnt_delta <= cnt_core) {
+								pq_core.push({ cnt_core - cnt_delta, {m, n} });
+							}
+							else {
+								pq_delta.push({ cnt_delta - cnt_core, {m, n} });
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (!pq_core.empty()) {
+		circle(coredeltaPrint, Point(pq_core.top().second.second + blockSize / 2, pq_core.top().second.first + blockSize / 2), 5, Scalar(0, 0, 255), 1, 16);
+	}
+
+	if (!pq_delta.empty()) {
+		int mmm = pq_delta.top().second.first;
+		int nnn = pq_delta.top().second.second;
+
+		line(coredeltaPrint, Point(nnn + blockSize / 2, mmm), Point(nnn + blockSize / 2, mmm + blockSize), Scalar(0, 0, 255), 1, LINE_AA, 0);
+		line(coredeltaPrint, Point(nnn, mmm + blockSize / 2), Point(nnn + blockSize, mmm + blockSize / 2), Scalar(0, 0, 255), 1, LINE_AA, 0);
+		pq_delta.pop();
+	}
+
+	if (!pq_delta.empty()) {
+		int mmm = pq_delta.top().second.first;
+		int nnn = pq_delta.top().second.second;
+
+		line(coredeltaPrint, Point(nnn + blockSize / 2, mmm), Point(nnn + blockSize / 2, mmm + blockSize), Scalar(0, 0, 255), 1, LINE_AA, 0);
+		line(coredeltaPrint, Point(nnn, mmm + blockSize / 2), Point(nnn + blockSize, mmm + blockSize / 2), Scalar(0, 0, 255), 1, LINE_AA, 0);
+	}
+
 	normalize(orientationMap, orientationMap, 0, 1, NORM_MINMAX);
 	imshow("Orientation field", orientationMap);
 
@@ -168,7 +310,14 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8)
 	imshow("Smoothed orientation field", smoothed);
 	imshow("Coherence", coherence);
 	// imshow("Orientation", fprintWithDirectionsSmoo);
-	pair<Mat, vector<pair<float, float>>> returning = { fprintWithDirectionsSmoo, vec };
+
+	pair<Mat, vector<pair<float, float>>> returning;
+
+	if (coredelta)
+		returning = { coredeltaPrint, vec };
+	else
+		returning = { fprintWithDirectionsSmoo, vec };
+
 	return returning;
 }
 
