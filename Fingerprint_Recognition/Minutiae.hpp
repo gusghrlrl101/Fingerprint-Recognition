@@ -152,8 +152,6 @@ float angle(vector<pair<float, float>>& vec, int& u, int& v, int& block_size, Si
 }
 
 
-
-
 Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float,float>>& vec, int& block_size, Size size) {
 	Mat temp;
 	Mat dst = src.clone();
