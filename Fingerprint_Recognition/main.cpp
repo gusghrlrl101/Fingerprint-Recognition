@@ -56,7 +56,7 @@ int main() {
 	Mat imgt = thinning(gabored_end);
 
 	Mat result = printMinutiae(imgt, segmented2, vec, block_size, size, src);
-//	calculate(imgt, src);
+	calculate(imgt, segmented2);
 
 	pyrUp(src, src);
 	imshow("src", src);

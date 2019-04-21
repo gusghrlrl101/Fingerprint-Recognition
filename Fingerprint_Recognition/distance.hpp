@@ -33,9 +33,11 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 	Point temp;
 	if (distanceX >= distanceY) { // X간의 거리가 더 넓은지, Y 간의 거리가 더 넓은지에 따라 분기
 		double rate = (double)(distanceX / distanceY); // 기울기
-		while (line1[line1.size() - 1].x != pt2.x || line1[line1.size() - 1].y != pt2.y) {
+		while (line1[line1.size() - 1].x != pt2.x && line1[line1.size() - 1].y != pt2.y) {
 			//번갈아가면서 더해줘야 맞는 직선이 나옴
 			if (pt1.y <= pt2.y) {
+				if (line1[line1.size() - 1].y >= pt2.y)
+					break;
 				if (chk) {
 					temp = { (int)(line1[line1.size() - 1].x + rate + 1), line1[line1.size() - 1].y + 1 };
 					chk = false;
@@ -46,6 +48,8 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 				}
 			}
 			else {
+				if (line1[line1.size() - 1].y <= pt2.y)
+					break;
 				if (chk) {
 					temp = { (int)(line1[line1.size() - 1].x + rate + 1), line1[line1.size() - 1].y - 1 };
 					chk = false;
@@ -63,6 +67,8 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 		while (line1[line1.size() - 1].x != pt2.x&&line1[line1.size() - 1].y != pt2.y) {
 			//번갈아가면서 더해줘야 맞는 직선이 나옴
 			if (pt1.y <= pt2.y) {
+				if (line1[line1.size() - 1].y >= pt2.y)
+					break;
 				if (chk) {
 					temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y + rate + 1) };
 					chk = false;
@@ -73,6 +79,8 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 				}
 			}
 			else {
+				if (line1[line1.size() - 1].y <= pt2.y)
+					break;
 				if (chk) {
 					temp = { line1[line1.size() - 1].x + 1,  (int)(line1[line1.size() - 1].y - rate - 1) };
 					chk = false;
@@ -91,6 +99,8 @@ int distance(Mat& src, Point& pt1, Point& pt2) {
 			count++;
 		}
 	}
+	if (count < 4)
+		return 0;
 	cout << "융선 수 :  " << count << endl;
 	cout << "총 거리 : " << distance << endl;
 	indiDistance = distance / (double)count;
@@ -135,7 +145,7 @@ void calculate(Mat imgt, Mat src) {
 		}
 	}
 
-	cout << "ending : " << endingN << " bif : " << bifN << " core : " << coreN << " delta : " << deltaN << endl;
+	//cout << "ending : " << endingN << " bif : " << bifN << " core : " << coreN << " delta : " << deltaN << endl;
 	int count = 1;
 	int distanceMean = 0, distanceMax = 0, distanceMin = 987654321;
 	int distanceN = 0;
@@ -148,14 +158,18 @@ void calculate(Mat imgt, Mat src) {
 				distanceN = distance(imgt, temp1, temp2);
 			else
 				distanceN = distance(imgt, temp2, temp1);
-			count++;
+			if (distanceN > 0)
+				count++;
 			if (distanceN > distanceMax)
 				distanceMax = distanceN;
-			if (distanceN < distanceMin)
+			if (distanceN < distanceMin && distanceN > 0)
 				distanceMin = distanceN;
 			distanceMean += distanceN;
 		}
 	}
 
 	distanceMean /= count;
+	cout << "Max : " << distanceMax << endl;
+	cout << "Min : " << distanceMin << endl;
+	cout << "Mean : " << distanceMean << endl;
 }
