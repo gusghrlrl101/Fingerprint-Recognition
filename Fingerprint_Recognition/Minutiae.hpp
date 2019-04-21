@@ -143,21 +143,22 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 	int val = size.width / block_size;
 	int width = u / block_size;
 	int height = v / block_size;
+	cout << "angle: " << height << ", " << width << endl;
 
-	fi = -atan2f(vec[height*val + width].second, vec[height*val + width].first) * 180 / CV_PI;
+	fi = - atan2f(vec[height * val + width].second, vec[height * val + width].first) * 180.0f / CV_PI;
 
 	// end인 경우
 	if (type == 1) {
 		// 현재 각도가 우상향인 경우
 		if (fi > 0) {
 			// 현재 점 기준 좌하향 방향에 다음 점이 있는 경우 180도 바꿔줌
-			if (dst.at<uchar>({ u - 1, v }) == 1 || dst.at<uchar>({ u - 1, v + 1 }) == 1 || dst.at<uchar>({ u, v + 1 }) == 1)
+			if (dst.at<uchar>(v, u - 1) == 1 || dst.at<uchar>(v + 1, u - 1 ) == 1 || dst.at<uchar>(v + 1, u) == 1)
 				fi -= 180;
 		}
 		// 현재 각도가 우하향인 경우
 		else if (fi < 0) {
 			// 현재 점 기준 우 상향 방향에 다음 점이 있는 경우 180도 바꿔줌
-			if (dst.at<uchar>({ u - 1, v }) == 1 || dst.at<uchar>({ u - 1, v - 1 }) == 1 || dst.at<uchar>({ u, v - 1 }) == 1)
+			if (dst.at<uchar>(v, u - 1) == 1 || dst.at<uchar>(v - 1, u - 1) == 1 || dst.at<uchar>(v - 1, u) == 1)
 				fi += 180;
 		}
 	}
@@ -177,7 +178,7 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 				for (int j = -1; j <= +1; j++) {
 					if (t == 1 || t == 0 && i*j == 0) {
 						if (0 <= u + i && u + i < size.width && 0 <= v + j && v + j < size.height &&
-							!visit[u + i][v + j] && dst.at<uchar>({ u + i, v + j }) == 1) {
+							!visit[u + i][v + j] && dst.at<uchar>(v + j, u + i) == 1) {
 							if (dir < 3) {
 								index[dir++] = { u + i, v + j };
 								visit[u + i][v + j] = true;
@@ -206,7 +207,7 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 								if (0 <= next_i && next_i < size.width &&
 									0 <= next_j && next_j < size.height &&
 									!visit[next_i][next_j] &&
-									dst.at<uchar>({ next_i, next_j }) == 1) {
+									dst.at<uchar>(next_j, next_i) == 1) {
 									index[dir] = { next_i, next_j };
 									visit[next_i][next_j] = true;
 
@@ -245,7 +246,7 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 			int v2y = index[two].second - v;
 
 			// 두 벡터의 내적을 구함
-			float inner = v1x * v2x + v1y * v2y;
+			int inner = v1x * v2x + v1y * v2y;
 			// 두 벡터의 크기를 구함
 			float v1_size = sqrt(pow(v1x, 2) + pow(v1y, 2));
 			float v2_size = sqrt(pow(v2x, 2) + pow(v2y, 2));
