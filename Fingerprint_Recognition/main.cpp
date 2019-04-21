@@ -18,7 +18,7 @@ int main() {
 	// orientation block size
 	int block_size = 7;
 
-	Mat src = imread("image/etc/21.bmp");
+	Mat src = imread("image/team1/2019_1_1_L_I_1.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
