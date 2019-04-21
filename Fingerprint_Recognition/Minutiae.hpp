@@ -268,11 +268,12 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 		float vx = mid_x - u;
 		float vy = mid_y - v;
 
-		// 벡터의 x값이 음수인 경우, 각도를 180도 바꿔줘야함
-		if (vx < 0) {
-			if (fi > 0)
+		if (0 < fi) {
+			if (0 < vx && 0 < vy)
 				fi -= 180;
-			else if (fi < 0)
+		}
+		else if (fi < 0) {
+			if( vx < 0 && vy < 0)
 				fi += 180;
 		}
 	}
@@ -315,6 +316,12 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 			line(dst2, { mVector[i].x, mVector[i].y },
 				{ mVector[i].x + (int)(10.0f * cos(-mVector[i].angle * CV_PI / 180.0f)), mVector[i].y + int(10.0f * sin(-mVector[i].angle* CV_PI / 180.0f)) }
 			, bif);
+
+			cout << mVector[i].angle << endl;
+			Mat temp_hyunho;
+			pyrUp(dst2, temp_hyunho);
+			imshow("temp_hyunho", temp_hyunho);
+			waitKey(0);
 		}
 	}
 
