@@ -134,7 +134,6 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 				float my = dy / (dx + FLT_EPSILON);
 				float mymy = my;
 
-				cout << "mymy: " << m << ", " << n << ": " << my << endl;
 				// 4°³·Î qusntazation
 				if (2.0f <= my)
 					mymy = FLT_MAX;
@@ -257,11 +256,6 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 							}
 							else if (vec_mymy[m + blockSize][n + blockSize] == 0.0f)
 								down_side += 2;
-
-
-							cout << "value: ";
-							cout << up_up + down_side << ", ";
-							cout << up_side + down_up << endl;
 
 							int cnt_core = up_side + down_up;
 							int cnt_delta = up_up + down_side;

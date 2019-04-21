@@ -316,12 +316,6 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 			line(dst2, { mVector[i].x, mVector[i].y },
 				{ mVector[i].x + (int)(10.0f * cos(-mVector[i].angle * CV_PI / 180.0f)), mVector[i].y + int(10.0f * sin(-mVector[i].angle* CV_PI / 180.0f)) }
 			, bif);
-
-			cout << mVector[i].angle << endl;
-			Mat temp_hyunho;
-			pyrUp(dst2, temp_hyunho);
-			imshow("temp_hyunho", temp_hyunho);
-			waitKey(0);
 		}
 	}
 
