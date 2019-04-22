@@ -18,7 +18,7 @@ int main() {
 	// orientation block size
 	int block_size = 7;
 
-	Mat src = imread("image/etc/21.bmp");
+	Mat src = imread("image/team1/2019_1_1_L_I_1.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
@@ -36,7 +36,7 @@ int main() {
 	imshow("segmented", segmented);
 	imshow("segmented2", segmented2);
 
-	
+
 	pair<Mat, vector<pair<float, float>>> returned = orientation(src, block_size);
 	Mat show = returned.first;
 	vector<pair<float, float>> vec = returned.second;
@@ -61,9 +61,9 @@ int main() {
 	pyrUp(src, src);
 	imshow("src", src);
 
-//	segmented.convertTo(segmented, CV_8U);
-//	pyrUp(segmented, segmented);
-//	imshow("segmented", segmented);
+	//	segmented.convertTo(segmented, CV_8U);
+	//	pyrUp(segmented, segmented);
+	//	imshow("segmented", segmented);
 
 	pyrUp(show, show);
 	imshow("show", show);
@@ -78,8 +78,8 @@ int main() {
 
 	pyrUp(result, result);
 	imshow("check", result);
-	
-	cout << "³¡!" << endl;
+
+	cout << "©ø¢®!" << endl;
 	waitKey(0);
 	return 0;
 }
