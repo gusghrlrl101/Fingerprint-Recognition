@@ -5,8 +5,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <math.h>
 
-#define THR 10
-
 using namespace std;
 using namespace cv;
 

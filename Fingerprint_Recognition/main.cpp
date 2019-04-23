@@ -25,7 +25,7 @@ int main() {
 	// rows, cols must be devided by block size
 	int block_size = 7;
 
-	Mat src = imread("image/etc/29.bmp");
+	Mat src = imread("image/etc/50.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
