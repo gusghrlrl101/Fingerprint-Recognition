@@ -1,7 +1,7 @@
 /*
 2019 DIP Team Project #1
 FingerPrint Reconition
-by Team1 (ï¿½Çµï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½È£, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+by Team1 (±Çµ¿Çö, ÀÓÁ¤Çõ, ÀÓÇöÈ£, ÃÖÁø¿ì)
 */
 
 #include <iostream>
@@ -32,18 +32,12 @@ int main() {
 	// resize image
 	resize(src, src, size);
 
-	Mat pyup_src;
-	pyrUp(src, pyup_src);
-	imshow("pyup_src", pyup_src);
-
 	Mat segmented;
 	// segmantation image
 	Mat segmented2 = segmentation(src, segmented);
 	// normalize image
 	equalizeHist(src, src);
 
-	imshow("segmented", segmented);
-	imshow("segmented2", segmented2);
 
 	// block oriented
 	pair<Mat, vector<pair<float, float>>> returned = orientation(src, block_size);
@@ -52,8 +46,6 @@ int main() {
 
 	pair<Mat, vector<pair<float, float>>> returned2 = orientation(src, 7, true);
 	Mat coredelta = returned2.first;
-	pyrUp(coredelta, coredelta);
-	imshow("coredelta", coredelta);
 
 	// gabor filter
 	Mat gabored = gabor(src, vec, block_size) + segmented2;
@@ -73,12 +65,11 @@ int main() {
 	pyrUp(src, src);
 	imshow("src", src);
 
-	//	segmented.convertTo(segmented, CV_8U);
-	//	pyrUp(segmented, segmented);
-	//	imshow("segmented", segmented);
-
 	pyrUp(show, show);
 	imshow("show", show);
+	
+	pyrUp(segmented2, segmented2);
+	imshow("segmented area", segmented2);
 
 	gabored.convertTo(gabored, CV_8U);
 	pyrUp(gabored, gabored);
@@ -91,7 +82,11 @@ int main() {
 	pyrUp(result, result);
 	imshow("check", result);
 
-	cout << "ï¿½ï¿½!" << endl;
+	pyrUp(coredelta, coredelta);
+	imshow("coredelta", coredelta);
+
+	cout << "³¡!" << endl;
+
 	waitKey(0);
 	return 0;
 }

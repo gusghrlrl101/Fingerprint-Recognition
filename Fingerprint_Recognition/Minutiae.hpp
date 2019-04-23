@@ -58,6 +58,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 	pCurr = img.ptr<uchar>(0);
 	pBelow = img.ptr<uchar>(1);
 
+	// 너무 많은 Minutiae가 검출된 경우 근처의 점은 제외한다.
 	for (int thr = 5; thr < 30; thr++) {
 		mVector.clear();
 		ending = 0;
@@ -91,6 +92,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 					uchar* segVal = &(area.ptr<uchar>(y))[x];
 					if (*segVal == 0) {
 						bool isAlready = false;
+						// 현재 찾은 Minutiae를 모두 찾아서 근처인지 확인
 						for (auto mnt : mVector) {
 							int distt = sqrt(pow(mnt.x - x, 2) + pow(mnt.y - y, 2));
 							if (distt <= thr) {
@@ -112,6 +114,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 					uchar* segVal = &(area.ptr<uchar>(y))[x];
 					if (*segVal == 0) {
 						bool isAlready = false;
+						// 현재 찾은 Minutiae를 모두 찾아서 근처인지 확인
 						for (auto mnt : mVector) {
 							int distt = sqrt(pow(mnt.x - x, 2) + pow(mnt.y - y, 2));
 							if (distt <= thr) {
@@ -132,6 +135,7 @@ vector<Minutiae> findMinutiae(Mat& img, Mat& seg) {
 			}
 		}
 
+		// 둘 중에서 30개가 넘은 경우 threshold를 증가시켜 다시 진행한다.
 		if (ending <= 30 && bifurcation <= 30) {
 			cout << "thr: " << thr << endl;
 			break;
@@ -275,12 +279,13 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 		float vx = mid_x - u;
 		float vy = mid_y - v;
 
+		// 방향이 같은 경우 각도를 180도 바꿔줌
 		if (0 < fi) {
 			if (0 < vx && 0 < vy)
 				fi -= 180;
 		}
 		else if (fi < 0) {
-			if( vx < 0 && vy < 0)
+			if (vx < 0 && vy < 0)
 				fi += 180;
 		}
 	}

@@ -28,6 +28,7 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 				float dx = vec[index].first;
 				float dy = vec[index].second;
 
+				// 해당 Block의 방향대로 theta를 설정해줌
 				theta = atan2f(dy, dx) + CV_PI / 2;
 
 				Mat temp;
@@ -40,6 +41,7 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 				if (height < m + block_size - 1 && temp_size >(height - 1) - m)
 					temp_size = (height - 1) - m;
 
+				// 해당 block만 이미지를 저장
 				for (int i = 0; i < height; i++) {
 					for (int j = 0; j < width; j++) {
 						if (m <= i && i <= m + temp_size && n <= j && j <= n + temp_size)
@@ -52,12 +54,8 @@ Mat gabor(Mat src, vector<pair<float, float>>& vec, int block_size) {
 		}
 	}
 
-
 	dst.convertTo(dst, CV_8U);
-	imshow("ddddst", dst);
-//	threshold(dst, dst, 127, 255, THRESH_BINARY);
 	adaptiveThreshold(dst, dst, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 15, 5);
-	imshow("dddddst", dst);
 
 	return dst;
 }
