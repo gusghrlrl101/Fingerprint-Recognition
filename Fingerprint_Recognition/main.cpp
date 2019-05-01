@@ -37,7 +37,7 @@ int main() {
 	ofstream output("2019_1_1_L_T_1.bin", ios::out | ios::binary);
 
 
-	Mat src = imread("image/etc/29.bmp");
+	Mat src = imread("image/etc/50.bmp");
 	Size size = { 154,203 };
 	cvtColor(src, src, COLOR_RGB2GRAY);
 
