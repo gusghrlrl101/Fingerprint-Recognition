@@ -10,7 +10,7 @@
 using namespace std;
 using namespace cv;
 
-pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool coredelta = false) {
+pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool coredelta = false, int* SP, int X[], int Y[], unsigned char O[], unsigned char T[]) {
 	Mat inputImage = src;
 
 	inputImage.convertTo(inputImage, CV_32F, 1.0 / 255, 0);
@@ -235,10 +235,18 @@ pair<Mat, vector<pair<float, float>>> orientation(Mat src, int size = 8, bool co
 
 							// 차이가 2 넘는 경우만 push, 코어가 더 많으면 코어, 델타가 더 많으면 델타
 							if (abs(cnt_delta - cnt_core) > 2) {
-								if (cnt_delta <= cnt_core)
-									pq_core.push({ cnt_core - cnt_delta, {m, n} });
-								else
-									pq_delta.push({ cnt_delta - cnt_core, {m, n} });
+								if (cnt_delta <= cnt_core) {
+									pq_core.push({ cnt_core - cnt_delta,{ m, n } });
+									T[*SP] = 10;
+								}
+								else {
+									pq_delta.push({ cnt_delta - cnt_core,{ m, n } });
+									T[*SP] = 11;
+								}
+								X[*SP] = m;
+								Y[*SP] = n;
+								O[*SP] = 0;
+								*SP++;
 							}
 						}
 					}

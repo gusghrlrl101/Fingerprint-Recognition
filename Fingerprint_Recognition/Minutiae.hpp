@@ -294,7 +294,7 @@ float angle(Mat& dst, vector<pair<float, float>>& vec, int& u, int& v, int& bloc
 }
 
 
-Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& block_size, Size size, Mat& original) {
+Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& block_size, Size size, Mat& original, int *M, int SP, int X[], int Y[], unsigned char O[], unsigned char T[]) {
 	Mat temp;
 	Mat dst = src.clone();
 	dst /= 255;         // convert to binary image
@@ -307,6 +307,20 @@ Mat printMinutiae(Mat src, Mat& srcc, vector<pair<float, float>>& vec, int& bloc
 
 	for (int i = 0; i < mVector.size(); i++)
 		mVector[i].angle = angle(dst, vec, mVector[i].x, mVector[i].y, block_size, size, mVector[i].type);
+
+	for (int i = 0; i < mVector.size(); i++) {
+		if (i == 50)
+			break;
+		M++;
+		X[SP] = mVector[i].x;
+		Y[SP] = mVector[i].y;
+		O[SP] = mVector[i].angle/360*255;
+		if (mVector[i].type == 2)
+			T[SP] = 2;
+		else
+			T[SP] = mVector[i].type;
+		SP++;
+	}
 
 	dst *= 255;
 	cvtColor(dst, dst, COLOR_GRAY2RGB);
